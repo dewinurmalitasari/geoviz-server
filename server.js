@@ -1,6 +1,6 @@
 import Fastify from 'fastify'
-import routes from "./route.js";
-import auth from "./auth.js";
+import routes from "./route/route.js";
+import auth from "./plugins/auth.js";
 import { config } from 'dotenv'
 import mongoosePlugin from './plugins/mongoose.js'
 import User from "./models/User.js";

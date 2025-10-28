@@ -1,5 +1,5 @@
-import userRoutes from "./route/user.js";
-import User from "./models/User.js";
+import userRoutes from "./user.js";
+import User from "../models/User.js";
 
 export default async function routes(fastify, options) {
     fastify.get('/', async (request, reply) => {
