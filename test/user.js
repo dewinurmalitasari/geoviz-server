@@ -1,6 +1,6 @@
-import { test } from 'node:test'
+import {test} from 'node:test'
 import assert from 'node:assert'
-import { build } from '../server.js'
+import {build} from '../server.js'
 import User from '../models/User.js'
 import mongoose from "mongoose";
 
@@ -32,7 +32,6 @@ const TEST_STUDENT_2 = {
 let fastify
 let adminToken
 let teacherToken
-let studentToken
 let createdUserId
 
 test('User API Tests', async (t) => {
@@ -40,17 +39,14 @@ test('User API Tests', async (t) => {
     await t.test('Setup - Initialize server and ensure admin exists', async (t) => {
         fastify = await build()
 
-        // Check if admin exists, create if not
-        const adminExists = await User.findOne({ username: 'admin' })
-        if (!adminExists) {
-            await User.create(TEST_ADMIN)
-            console.log('Default admin created')
-        }
-
         // Clean up any existing test users
         await User.deleteMany({
-            username: { $in: ['teacher1', 'student1', 'student2', 'testuser'] }
+            username: {$in: ['teacher1', 'student1', 'student2', 'testuser', 'admin']}
         })
+
+        // Create admin user
+        let adminUser = new User(TEST_ADMIN)
+        await adminUser.save()
     })
 
     // Test 0: Wrong login
@@ -350,11 +346,11 @@ test('User API Tests', async (t) => {
     // Test 16: Clean up - remove all test users except admin
     await t.test('Clean up test data', async (t) => {
         await User.deleteMany({
-            username: { $in: ['teacher1', 'student2', 'updatedstudent'] }
+            username: {$in: ['teacher1', 'student2', 'updatedstudent', 'admin']}
         })
 
         const remainingTestUsers = await User.find({
-            username: { $in: ['teacher1', 'student1', 'student2', 'updatedstudent'] }
+            username: {$in: ['teacher1', 'student1', 'student2', 'updatedstudent']}
         })
 
         assert.strictEqual(remainingTestUsers.length, 0)

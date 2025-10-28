@@ -1,5 +1,6 @@
 import userRoutes from "./user.js";
 import User from "../models/User.js";
+import materialRoutes from "./material.js";
 
 export default async function routes(fastify, options) {
     fastify.get('/', async (request, reply) => {
@@ -38,6 +39,7 @@ export default async function routes(fastify, options) {
     fastify.register(userRoutes);
 
     // Material route
+    fastify.register(materialRoutes);
 
     // Practice route
 

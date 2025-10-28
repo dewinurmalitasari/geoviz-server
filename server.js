@@ -26,14 +26,6 @@ const start = async () => {
 
 start()
 
-await fastify.after() // wait for all plugins
-
-const adminExists = await User.findOne({ username: 'admin' })
-if (!adminExists) {
-    await User.create({ username: 'admin', password: 'thisIsAdmin123', role: 'admin' })
-    fastify.log.info('Default admin created')
-}
-
 export async function build() {
     const fastify = Fastify({
         logger: false // Disable logger during tests for cleaner output
