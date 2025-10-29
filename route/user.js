@@ -138,7 +138,7 @@ export default async function userRoutes(fastify) {
                         user: {
                             type: 'object',
                             properties: {
-                                id: {type: 'string'},
+                                _id: {type: 'string'},
                                 username: {type: 'string'},
                                 role: {type: 'string'}
                             }
@@ -185,7 +185,7 @@ export default async function userRoutes(fastify) {
                         user: {
                             type: 'object',
                             properties: {
-                                id: {type: 'string'},
+                                _id: {type: 'string'},
                                 username: {type: 'string'},
                                 role: {type: 'string'}
                             }
