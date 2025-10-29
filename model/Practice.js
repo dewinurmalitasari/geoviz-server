@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import bcrypt from "bcrypt";
 
 const practiceSchema = new mongoose.Schema({
     code: { type: String, required: true },

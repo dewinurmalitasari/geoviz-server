@@ -1,4 +1,5 @@
 import Practice from "../model/Practice.js";
+import Statistic from "../model/Statistic.js";
 
 export default async function practiceRoute(fastify) {
     // Submit practice
@@ -66,10 +67,18 @@ export default async function practiceRoute(fastify) {
             content,
             user: userId
         })
-
         await practice.save()
 
-        // TODO: track completion event
+        // Track completion event
+        const statistic = new Statistic({
+            type: 'practice_completed',
+            data: {
+                code,
+                practice: practice._id
+            },
+            user: userId
+        })
+        await statistic.save()
 
         return reply.code(201).send({ practice })
     })
