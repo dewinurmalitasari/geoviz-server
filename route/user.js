@@ -1,4 +1,4 @@
-import User from "../models/User.js";
+import User from "../model/User.js";
 
 export default async function userRoutes(fastify) {
     // Get all users

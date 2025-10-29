@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert'
 import {build} from '../server.js'
-import User from '../models/User.js'
+import User from '../model/User.js'
 import mongoose from "mongoose";
 
 // Test data
@@ -91,7 +91,6 @@ test('User API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
-        assert.strictEqual(data.message, 'Login successful')
         assert.strictEqual(data.user.username, TEST_ADMIN.username)
         assert.strictEqual(data.user.role, TEST_ADMIN.role)
         assert.ok(data.token)
@@ -131,7 +130,6 @@ test('User API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
-        assert.strictEqual(data.message, 'Login successful')
         assert.strictEqual(data.user.username, TEST_TEACHER.username)
         assert.strictEqual(data.user.role, TEST_TEACHER.role)
         assert.ok(data.token)

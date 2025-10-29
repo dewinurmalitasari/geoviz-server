@@ -1,5 +1,4 @@
-import Material from "../models/Material.js";
-import mongoose from "../plugins/mongoose.js";
+import Material from "../model/Material.js";
 
 export default async function materialRoutes(fastify) {
     // Get all materials

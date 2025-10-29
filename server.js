@@ -3,7 +3,7 @@ import routes from "./route/route.js";
 import auth from "./plugins/auth.js";
 import { config } from 'dotenv'
 import mongoosePlugin from './plugins/mongoose.js'
-import User from "./models/User.js";
+import User from "./model/User.js";
 
 config()
 
