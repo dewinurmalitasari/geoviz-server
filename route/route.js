@@ -1,6 +1,8 @@
 import userRoutes from "./user.js";
-import User from "../models/User.js";
+import User from "../model/User.js";
 import materialRoutes from "./material.js";
+import practiceRoute from "./practice.js";
+import statisticRoute from "./statistic.js";
 
 export default async function routes(fastify, options) {
     fastify.get('/', async (request, reply) => {
@@ -29,7 +31,6 @@ export default async function routes(fastify, options) {
         if (!match) return reply.code(401).send({message: 'Invalid password'})
 
         return {
-            message: 'Login successful',
             user: {id: user._id, username: user.username, role: user.role},
             token: fastify.jwt.sign({id: user._id, role: user.role})
         }
@@ -42,7 +43,8 @@ export default async function routes(fastify, options) {
     fastify.register(materialRoutes);
 
     // Practice route
+    fastify.register(practiceRoute);
 
-    // Tracker route
-    // - visit site, access material, access practice, complete practice
+    // Statistics route
+    fastify.register(statisticRoute)
 }

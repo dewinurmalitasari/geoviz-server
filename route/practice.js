@@ -1,0 +1,131 @@
+import Practice from "../model/Practice.js";
+
+export default async function practiceRoute(fastify) {
+    // Submit practice
+    fastify.post('/practices', {
+        preHandler: fastify.authorize(['student']),
+        schema: {
+            body: {
+                type: 'object',
+                required: ['code', 'score'],
+                properties: {
+                    code: { type: 'string' },
+                    score: {
+                        type: 'object',
+                        required: ['correct', 'total'],
+                        properties: {
+                            correct: { type: 'number' },
+                            total: { type: 'number' }
+                        }
+                    },
+                    content: { type: 'object' }
+                }
+            },
+            response: {
+                201: {
+                    type: 'object',
+                    properties: {
+                        practice: {
+                            type: 'object',
+                            properties: {
+                                _id: { type: 'string' },
+                                code: { type: 'string' },
+                                score: {
+                                    type: 'object',
+                                    properties: {
+                                        correct: { type: 'number' },
+                                        total: { type: 'number' }
+                                    }
+                                },
+                                content: {
+                                    type: 'object',
+                                    additionalProperties: true
+                                },
+                                user: { type: 'string' },
+                                createdAt: { type: 'string' },
+                                updatedAt: { type: 'string' }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        const { code, score, content } = request.body
+        const userId = request.user.id
+
+        if (score.correct < 0 || score.total < 0) {
+            return reply.code(400).send({
+                message: 'Score values cannot be negative'
+            })
+        }
+
+        const practice = new Practice({
+            code,
+            score,
+            content,
+            user: userId
+        })
+
+        await practice.save()
+
+        // TODO: track completion event
+
+        return reply.code(201).send({ practice })
+    })
+
+    // Get practices by user ID
+    fastify.get('/practices/user/:id', {
+        preHandler: fastify.authorize(['admin', 'teacher', 'student']),
+        schema: {
+            params: {
+                type: 'object',
+                properties: {
+                    id: { type: 'string' }
+                }
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        practices: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    _id: { type: 'string' },
+                                    code: { type: 'string' },
+                                    score: {
+                                        type: 'object',
+                                        properties: {
+                                            correct: { type: 'number' },
+                                            total: { type: 'number' }
+                                        }
+                                    },
+                                    content: {
+                                        type: 'object',
+                                        additionalProperties: true
+                                    },
+                                    user: { type: 'string' },
+                                    createdAt: { type: 'string' },
+                                    updatedAt: { type: 'string' }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        const { id } = request.params
+
+        // If the requester is a student, ensure they can only access their own practices
+        if (request.user.role === 'student' && request.user.id !== id) {
+            return reply.code(403).send({ message: 'Forbidden' })
+        }
+
+        const practices = await Practice.find({ user: id }).sort({ createdAt: -1 })
+
+        return { practices }
+    })
+}
