@@ -73,7 +73,7 @@ test('User API Tests', async (t) => {
             }
         })
 
-        assert.strictEqual(response2.statusCode, 400)
+        assert.strictEqual(response2.statusCode, 401)
         const data2 = response2.json()
         assert.strictEqual(data2.message, 'User not found')
     })
@@ -109,9 +109,8 @@ test('User API Tests', async (t) => {
             payload: TEST_TEACHER
         })
 
-        assert.strictEqual(response.statusCode, 200)
+        assert.strictEqual(response.statusCode, 201)
         const data = response.json()
-        assert.strictEqual(data.message, 'User created')
         assert.strictEqual(data.user.username, TEST_TEACHER.username)
         assert.strictEqual(data.user.role, TEST_TEACHER.role)
         assert.ok(data.user.id)
@@ -148,9 +147,8 @@ test('User API Tests', async (t) => {
             payload: TEST_STUDENT
         })
 
-        assert.strictEqual(response.statusCode, 200)
+        assert.strictEqual(response.statusCode, 201)
         const data = response.json()
-        assert.strictEqual(data.message, 'User created')
         assert.strictEqual(data.user.username, TEST_STUDENT.username)
         assert.strictEqual(data.user.role, TEST_STUDENT.role)
         assert.ok(data.user.id)
@@ -184,7 +182,6 @@ test('User API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
-        assert.strictEqual(data.message, 'User updated')
         assert.strictEqual(data.user.username, updatedData.username)
     })
 

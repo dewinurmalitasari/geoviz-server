@@ -139,7 +139,6 @@ test('Material API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 201)
         const data = response.json()
-        assert.strictEqual(data.message, 'Material created successfully')
         assert.strictEqual(data.material.title, TEST_MATERIAL.title)
         assert.strictEqual(data.material.description, TEST_MATERIAL.description)
         assert.strictEqual(data.material.formula, TEST_MATERIAL.formula)
@@ -317,7 +316,6 @@ test('Material API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
-        assert.strictEqual(data.message, 'Material updated successfully')
         assert.strictEqual(data.material.title, UPDATED_MATERIAL.title)
         assert.strictEqual(data.material.description, UPDATED_MATERIAL.description)
         assert.strictEqual(data.material.formula, UPDATED_MATERIAL.formula)

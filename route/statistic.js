@@ -38,6 +38,12 @@ export default async function statisticRoute(fastify) {
                             }
                         }
                     }
+                },
+                400: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
                 }
             }
         }

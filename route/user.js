@@ -102,6 +102,12 @@ export default async function userRoutes(fastify) {
                             }
                         }
                     }
+                },
+                404: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
                 }
             }
         }
@@ -124,6 +130,27 @@ export default async function userRoutes(fastify) {
                     password: {type: 'string', minLength: 8},
                     role: {type: 'string', enum: ['admin', 'teacher', 'student']}
                 }
+            },
+            response: {
+                201: {
+                    type: 'object',
+                    properties: {
+                        user: {
+                            type: 'object',
+                            properties: {
+                                id: {type: 'string'},
+                                username: {type: 'string'},
+                                role: {type: 'string'}
+                            }
+                        }
+                    }
+                },
+                403: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
+                }
             }
         }
     }, async (request, reply) => {
@@ -136,7 +163,7 @@ export default async function userRoutes(fastify) {
         }
 
         const user = await User.create({username, password, role})
-        return {message: 'User created', user: {id: user._id, username, role}}
+        reply.code(201).send({user: {id: user._id, username, role}})
     })
 
     // Update user by ID
@@ -149,6 +176,33 @@ export default async function userRoutes(fastify) {
                     username: {type: 'string', minLength: 3, maxLength: 32},
                     password: {type: 'string', minLength: 8},
                     role: {type: 'string', enum: ['admin', 'teacher', 'student']}
+                }
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        user: {
+                            type: 'object',
+                            properties: {
+                                id: {type: 'string'},
+                                username: {type: 'string'},
+                                role: {type: 'string'}
+                            }
+                        }
+                    }
+                },
+                403: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
+                },
+                404: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
                 }
             }
         }
@@ -173,12 +227,28 @@ export default async function userRoutes(fastify) {
         Object.assign(user, updateData)
         await user.save()
 
-        return {message: 'User updated', user: {id: user._id, username: user.username, role: user.role}}
+        return {user: {id: user._id, username: user.username, role: user.role}}
     })
 
     // Delete user by ID
     fastify.delete('/users/:id', {
         preHandler: fastify.authorize(['admin']),
+        schema: {
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
+                },
+                404: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
+                }
+            }
+        }
     }, async (request, reply) => {
         const {id} = request.params
         const user = await User.findByIdAndDelete(id)

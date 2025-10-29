@@ -60,6 +60,12 @@ export default async function materialRoutes(fastify) {
                             }
                         }
                     }
+                },
+                404: {
+                    type: 'object',
+                    properties: {
+                        message: { type: 'string' }
+                    }
                 }
             }
         }
@@ -92,7 +98,6 @@ export default async function materialRoutes(fastify) {
                 201: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' },
                         material: {
                             type: 'object',
                             properties: {
@@ -105,6 +110,12 @@ export default async function materialRoutes(fastify) {
                                 updatedAt: { type: 'string' }
                             }
                         }
+                    }
+                },
+                409: {
+                    type: 'object',
+                    properties: {
+                        message: { type: 'string' }
                     }
                 }
             }
@@ -125,11 +136,7 @@ export default async function materialRoutes(fastify) {
             example
         });
 
-        reply.code(201);
-        return {
-            message: 'Material created successfully',
-            material
-        };
+        reply.code(201).send({material});
     });
 
     // Update material by ID
@@ -155,7 +162,6 @@ export default async function materialRoutes(fastify) {
                 200: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' },
                         material: {
                             type: 'object',
                             properties: {
@@ -204,7 +210,6 @@ export default async function materialRoutes(fastify) {
         );
 
         return {
-            message: 'Material updated successfully',
             material: updatedMaterial
         };
     });

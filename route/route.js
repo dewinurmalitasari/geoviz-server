@@ -20,12 +20,34 @@ export default async function routes(fastify, options) {
                     username: {type: 'string', minLength: 3, maxLength: 32},
                     password: {type: 'string', minLength: 8}
                 }
+            },
+            schema: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        user: {
+                            type: 'object',
+                            properties: {
+                                id: {type: 'string'},
+                                username: {type: 'string'},
+                                role: {type: 'string'}
+                            }
+                        },
+                        token: {type: 'string'}
+                    }
+                },
+                401: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
+                }
             }
         }
     }, async (request, reply) => {
         const {username, password} = request.body
         const user = await User.findOne({username})
-        if (!user) return reply.code(400).send({message: 'User not found'})
+        if (!user) return reply.code(401).send({message: 'User not found'})
 
         const match = await user.comparePassword(password)
         if (!match) return reply.code(401).send({message: 'Invalid password'})

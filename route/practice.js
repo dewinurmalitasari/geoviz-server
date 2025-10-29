@@ -48,6 +48,12 @@ export default async function practiceRoute(fastify) {
                             }
                         }
                     }
+                },
+                400: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
                 }
             }
         }
