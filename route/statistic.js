@@ -5,6 +5,7 @@ export default async function statisticRoute(fastify) {
     fastify.post('/statistics', {
         preHandler: fastify.authorize(['student']),
         schema: {
+            security: [{ bearerAuth: [] }],
             body: {
                 type: 'object',
                 required: ['type', 'data'],
@@ -23,6 +24,7 @@ export default async function statisticRoute(fastify) {
                 201: {
                     type: 'object',
                     properties: {
+                        message: { type: 'string' },
                         statistic: {
                             type: 'object',
                             properties: {
@@ -75,17 +77,19 @@ export default async function statisticRoute(fastify) {
         const statistic = new Statistic({type, data: data, user: userId})
         await statistic.save()
 
-        return reply.code(201).send({statistic})
+        return reply.code(201).send({ message: 'Statistic tracked successfully', statistic })
     })
 
     // Get statistics by student id (admin and teacher only)
     fastify.get('/statistics/user/:id', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
+            security: [{ bearerAuth: [] }],
             response: {
                 200: {
                     type: 'object',
                     properties: {
+                        message: { type: 'string' },
                         statistics: {
                             type: 'array',
                             items: {
@@ -111,6 +115,6 @@ export default async function statisticRoute(fastify) {
         const userId = request.params.id
 
         const statistics = await Statistic.find({user: userId}).sort({ createdAt: -1 })
-        return reply.code(200).send({statistics})
+        return reply.code(200).send({ message: 'Statistics retrieved successfully', statistics })
     })
 }

@@ -1,11 +1,11 @@
 import Fastify from 'fastify'
 import routes from "./route/route.js";
 import auth from "./plugins/auth.js";
-import { config } from 'dotenv'
+import {config} from 'dotenv'
 import mongoosePlugin from './plugins/mongoose.js'
-import User from "./model/User.js";
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
+import cors from '@fastify/cors'
 
 config()
 
@@ -13,44 +13,47 @@ const fastify = Fastify({
     logger: true
 })
 
+// CORS configuration for development
+if (process.env.DEV_CORS_ORIGIN) {
+    fastify.register(cors, {
+        origin: process.env.DEV_CORS_ORIGIN,
+        credentials: true
+    })
+}
+
 // Swagger configuration
 fastify.register(swagger, {
-    swagger: {
+    openapi: {
         info: {
             title: 'GeoViz API Documentation',
             description: 'Back-End Server for GeoViz',
             version: '1.0.0'
         },
-        // host: `${process.env.HOST}:${process.env.PORT}`,
-        schemes: ['http', 'https'],
-        consumes: ['application/json'],
-        produces: ['application/json'],
-        securityDefinitions: {
-            bearerAuth: {
-                type: 'apiKey',
-                name: 'Authorization',
-                in: 'header',
-                description: 'Enter JWT token in the format: Bearer <token>'
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT'
+                }
             }
         }
     }
 })
-
 // Swagger UI configuration
 fastify.register(swaggerUi, {
     routePrefix: '/docs',
     uiConfig: {
         docExpansion: 'full',
-        deepLinking: false
+        deepLinking: false,
+        persistAuthorization: true,
+        tryItOutEnabled: true
     },
+    initOAuth: {},
     uiHooks: {
         onRequest: function (request, reply, next) { next() },
         preHandler: function (request, reply, next) { next() }
-    },
-    staticCSP: true,
-    transformStaticCSP: (header) => header,
-    transformSpecification: (swaggerObject, request, reply) => { return swaggerObject },
-    transformSpecificationClone: true
+    }
 })
 
 fastify.register(mongoosePlugin)

@@ -5,10 +5,12 @@ export default async function materialRoutes(fastify) {
     fastify.get('/materials', {
         preHandler: fastify.authorize(['admin']),
         schema: {
+            security: [{ bearerAuth: [] }],
             response: {
                 200: {
                     type: 'object',
                     properties: {
+                        message: { type: 'string' },
                         materials: {
                             type: 'array',
                             items: {
@@ -30,13 +32,14 @@ export default async function materialRoutes(fastify) {
         }
     }, async () => {
         const materials = await Material.find().sort({ createdAt: -1 });
-        return { materials };
+        return { message: 'Materials retrieved successfully', materials };
     });
 
     // Get material by ID
     fastify.get('/materials/:id', {
         preHandler: fastify.authorize(['admin']),
         schema: {
+            security: [{ bearerAuth: [] }],
             params: {
                 type: 'object',
                 properties: {
@@ -47,6 +50,7 @@ export default async function materialRoutes(fastify) {
                 200: {
                     type: 'object',
                     properties: {
+                        message: { type: 'string' },
                         material: {
                             type: 'object',
                             properties: {
@@ -77,13 +81,14 @@ export default async function materialRoutes(fastify) {
             return reply.code(404).send({ message: 'Material not found' });
         }
 
-        return { material };
+        return { message: 'Material retrieved successfully', material };
     });
 
     // Create new material
     fastify.post('/materials', {
         preHandler: fastify.authorize(['admin']),
         schema: {
+            security: [{ bearerAuth: [] }],
             body: {
                 type: 'object',
                 required: ['title', 'description', 'formula', 'example'],
@@ -98,6 +103,7 @@ export default async function materialRoutes(fastify) {
                 201: {
                     type: 'object',
                     properties: {
+                        message: { type: 'string' },
                         material: {
                             type: 'object',
                             properties: {
@@ -136,13 +142,14 @@ export default async function materialRoutes(fastify) {
             example
         });
 
-        reply.code(201).send({material});
+        reply.code(201).send({ message: 'Material created successfully', material });
     });
 
     // Update material by ID
     fastify.put('/materials/:id', {
         preHandler: fastify.authorize(['admin']),
         schema: {
+            security: [{ bearerAuth: [] }],
             params: {
                 type: 'object',
                 properties: {
@@ -162,6 +169,7 @@ export default async function materialRoutes(fastify) {
                 200: {
                     type: 'object',
                     properties: {
+                        message: { type: 'string' },
                         material: {
                             type: 'object',
                             properties: {
@@ -174,6 +182,18 @@ export default async function materialRoutes(fastify) {
                                 updatedAt: { type: 'string' }
                             }
                         }
+                    }
+                },
+                404: {
+                    type: 'object',
+                    properties: {
+                        message: { type: 'string' }
+                    }
+                },
+                409: {
+                    type: 'object',
+                    properties: {
+                        message: { type: 'string' }
                     }
                 }
             }
@@ -210,6 +230,7 @@ export default async function materialRoutes(fastify) {
         );
 
         return {
+            message: 'Material updated successfully',
             material: updatedMaterial
         };
     });
@@ -218,6 +239,7 @@ export default async function materialRoutes(fastify) {
     fastify.delete('/materials/:id', {
         preHandler: fastify.authorize(['admin']),
         schema: {
+            security: [{ bearerAuth: [] }],
             params: {
                 type: 'object',
                 properties: {
@@ -226,6 +248,12 @@ export default async function materialRoutes(fastify) {
             },
             response: {
                 200: {
+                    type: 'object',
+                    properties: {
+                        message: { type: 'string' }
+                    }
+                },
+                404: {
                     type: 'object',
                     properties: {
                         message: { type: 'string' }

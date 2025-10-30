@@ -6,6 +6,7 @@ export default async function practiceRoute(fastify) {
     fastify.post('/practices', {
         preHandler: fastify.authorize(['student']),
         schema: {
+            security: [{ bearerAuth: [] }],
             body: {
                 type: 'object',
                 required: ['code', 'score'],
@@ -26,6 +27,7 @@ export default async function practiceRoute(fastify) {
                 201: {
                     type: 'object',
                     properties: {
+                        message: { type: 'string' },
                         practice: {
                             type: 'object',
                             properties: {
@@ -86,13 +88,14 @@ export default async function practiceRoute(fastify) {
         })
         await statistic.save()
 
-        return reply.code(201).send({ practice })
+        return reply.code(201).send({ message: 'Practice submitted successfully', practice })
     })
 
     // Get practices by user ID
     fastify.get('/practices/user/:id', {
         preHandler: fastify.authorize(['admin', 'teacher', 'student']),
         schema: {
+            security: [{ bearerAuth: [] }],
             params: {
                 type: 'object',
                 properties: {
@@ -103,6 +106,7 @@ export default async function practiceRoute(fastify) {
                 200: {
                     type: 'object',
                     properties: {
+                        message: { type: 'string' },
                         practices: {
                             type: 'array',
                             items: {
@@ -128,6 +132,12 @@ export default async function practiceRoute(fastify) {
                             }
                         }
                     }
+                },
+                403: {
+                    type: 'object',
+                    properties: {
+                        message: { type: 'string' }
+                    }
                 }
             }
         }
@@ -141,6 +151,6 @@ export default async function practiceRoute(fastify) {
 
         const practices = await Practice.find({ user: id }).sort({ createdAt: -1 })
 
-        return { practices }
+        return { message: 'Practices retrieved successfully', practices }
     })
 }

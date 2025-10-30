@@ -17,18 +17,19 @@ export default async function routes(fastify, options) {
                 type: 'object',
                 required: ['username', 'password'],
                 properties: {
-                    username: {type: 'string', minLength: 3, maxLength: 32},
-                    password: {type: 'string', minLength: 8}
+                    username: {type: 'string'},
+                    password: {type: 'string'}
                 }
             },
             schema: {
                 200: {
                     type: 'object',
                     properties: {
+                        message: {type: 'string'},
                         user: {
                             type: 'object',
                             properties: {
-                                id: {type: 'string'},
+                                _id: {type: 'string'},
                                 username: {type: 'string'},
                                 role: {type: 'string'}
                             }
@@ -53,8 +54,12 @@ export default async function routes(fastify, options) {
         if (!match) return reply.code(401).send({message: 'Invalid password'})
 
         return {
-            user: {id: user._id, username: user.username, role: user.role},
-            token: fastify.jwt.sign({id: user._id, role: user.role})
+            message: 'Login successful',
+            user: {_id: user._id, username: user.username, role: user.role},
+            token: fastify.jwt.sign(
+                {id: user._id, role: user.role},
+                {expiresIn: '7d'} // Token valid for 7 days
+            )
         }
     })
 
