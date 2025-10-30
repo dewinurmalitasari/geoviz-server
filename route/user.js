@@ -1,11 +1,17 @@
 import User from "../model/User.js";
 
 export default async function userRoutes(fastify) {
-    // Get all users
+    // Get all users with optional role filter
     fastify.get('/users', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
             security: [{ bearerAuth: [] }],
+            querystring: {
+                type: 'object',
+                properties: {
+                    role: { type: 'string', enum: ['admin', 'teacher', 'student'] }
+                }
+            },
             response: {
                 200: {
                     type: 'object',
@@ -16,9 +22,9 @@ export default async function userRoutes(fastify) {
                             items: {
                                 type: 'object',
                                 properties: {
-                                    _id: {type: 'string'},
-                                    username: {type: 'string'},
-                                    role: {type: 'string'}
+                                    _id: { type: 'string' },
+                                    username: { type: 'string' },
+                                    role: { type: 'string' }
                                 }
                             }
                         }
@@ -26,70 +32,13 @@ export default async function userRoutes(fastify) {
                 }
             }
         }
-    }, async () => {
-        const users = await User.find({}, '-password') // exclude password
-        return { message: 'Users retrieved successfully', users }
-    })
+    }, async (request) => {
+        const { role } = request.query;
+        const filter = role ? { role } : {};
+        const users = await User.find(filter, '-password').lean();
+        return { message: 'Users retrieved successfully', users };
+    });
 
-    // Get all teachers
-    fastify.get('/teachers', {
-        preHandler: fastify.authorize(['admin', 'teacher']),
-        schema: {
-            security: [{ bearerAuth: [] }],
-            response: {
-                200: {
-                    type: 'object',
-                    properties: {
-                        message: { type: 'string' },
-                        teachers: {
-                            type: 'array',
-                            items: {
-                                type: 'object',
-                                properties: {
-                                    _id: {type: 'string'},
-                                    username: {type: 'string'},
-                                    role: {type: 'string'}
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }, async () => {
-        const teachers = await User.find({role: 'teacher'}, '-password') // exclude password
-        return { message: 'Teachers retrieved successfully', teachers }
-    })
-
-    // Get all students
-    fastify.get('/students', {
-        preHandler: fastify.authorize(['admin', 'teacher']),
-        schema: {
-            security: [{ bearerAuth: [] }],
-            response: {
-                200: {
-                    type: 'object',
-                    properties: {
-                        message: { type: 'string' },
-                        students: {
-                            type: 'array',
-                            items: {
-                                type: 'object',
-                                properties: {
-                                    _id: {type: 'string'},
-                                    username: {type: 'string'},
-                                    role: {type: 'string'}
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }, async () => {
-        const students = await User.find({role: 'student'}, '-password') // exclude password
-        return { message: 'Students retrieved successfully', students }
-    })
 
     // Get user by ID
     fastify.get('/users/:id', {
