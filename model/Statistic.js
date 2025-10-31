@@ -7,3 +7,10 @@ const statisticSchema = new mongoose.Schema({
 }, { timestamps: true, minimize: false })
 
 export default mongoose.model('Statistic', statisticSchema)
+
+/* Statistic Data Model
+* visit: {}
+* material: { materialId: String }
+* practice: { code: String }
+* practice_completed: { code: String, practiceId: ObjectId }
+*/
