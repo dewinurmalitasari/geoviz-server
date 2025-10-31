@@ -1,4 +1,6 @@
 import User from "../model/User.js";
+import Statistic from "../model/Statistic.js";
+import Practice from "../model/Practice.js";
 
 export default async function userRoutes(fastify) {
     // Get all users with optional role filter
@@ -134,7 +136,7 @@ export default async function userRoutes(fastify) {
         }
 
         const user = await User.create({username, password, role})
-        reply.code(201).send({ message: 'User created successfully', user: {id: user._id, username, role} })
+        reply.code(201).send({ message: 'User created successfully', user: {_id: user._id, username: user.username, role: user.role} })
     })
 
     // Update user by ID
@@ -215,12 +217,12 @@ export default async function userRoutes(fastify) {
         Object.assign(user, updateData)
         await user.save()
 
-        return { message: 'User updated successfully', user: {id: user._id, username: user.username, role: user.role} }
+        return { message: 'User updated successfully', user: {_id: user._id, username: user.username, role: user.role} }
     })
 
     // Delete user by ID
     fastify.delete('/users/:id', {
-        preHandler: fastify.authorize(['admin']),
+        preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
             security: [{ bearerAuth: [] }],
             response: {
@@ -239,9 +241,30 @@ export default async function userRoutes(fastify) {
             }
         }
     }, async (request, reply) => {
-        const {id} = request.params
-        const user = await User.findByIdAndDelete(id)
-        if (!user) return reply.code(404).send({message: 'User not found'})
-        return {message: 'User deleted'}
+        const { id } = request.params
+        const currentUserRole = request.user.role
+
+        const userToDelete = await User.findById(id)
+        if (!userToDelete) {
+            return reply.code(404).send({ message: 'User not found' })
+        }
+
+        // Teachers can only delete student accounts
+        if (currentUserRole === 'teacher' && userToDelete.role !== 'student') {
+            return reply.code(403).send({ message: 'Teachers can only delete student accounts' })
+        }
+
+        const [deleteUserResult] = await Promise.all([
+            User.findByIdAndDelete(id),
+            Statistic.deleteMany({ user: id }),
+            Practice.deleteMany({ user: id })
+        ])
+
+        // For consistency and just in case
+        if (!deleteUserResult) {
+            return reply.code(404).send({ message: 'User not found' })
+        }
+
+        return { message: 'User deleted' }
     })
 }

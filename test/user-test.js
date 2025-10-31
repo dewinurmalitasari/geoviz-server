@@ -113,7 +113,7 @@ test('User API Tests', async (t) => {
         const data = response.json()
         assert.strictEqual(data.user.username, TEST_TEACHER.username)
         assert.strictEqual(data.user.role, TEST_TEACHER.role)
-        assert.ok(data.user.id)
+        assert.ok(data.user._id)
     })
 
     // Test 3: Teacher login
@@ -151,9 +151,9 @@ test('User API Tests', async (t) => {
         const data = response.json()
         assert.strictEqual(data.user.username, TEST_STUDENT.username)
         assert.strictEqual(data.user.role, TEST_STUDENT.role)
-        assert.ok(data.user.id)
+        assert.ok(data.user._id)
 
-        createdUserId = data.user.id
+        createdUserId = data.user._id
     })
 
     // Test 5: Check user in database
@@ -255,11 +255,11 @@ test('User API Tests', async (t) => {
         })
     })
 
-    // Test 11: Get all teachers
-    await t.test('Get all teachers', async (t) => {
+    // Test 10a: Get all users with role filter - admin
+    await t.test('Get all users with role filter - admin', async (t) => {
         const response = await fastify.inject({
             method: 'GET',
-            url: '/teachers',
+            url: '/users?role=admin',
             headers: {
                 authorization: `Bearer ${adminToken}`
             }
@@ -267,19 +267,21 @@ test('User API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
-        assert.ok(data.teachers)
+        assert.ok(data.users)
+        assert.ok(data.users.length >= 1)
 
-        // Should have at least the test teacher
-        const teacher = data.teachers.find(t => t.username === TEST_TEACHER.username)
-        assert.ok(teacher)
-        assert.strictEqual(teacher.role, 'teacher')
+        // Verify all returned users are admins
+        data.users.forEach(user => {
+            assert.strictEqual(user.role, 'admin')
+            assert.strictEqual(user.password, undefined)
+        })
     })
 
-    // Test 12: Get all students
-    await t.test('Get all students', async (t) => {
+    // Test 10b: Get all users with role filter - teacher
+    await t.test('Get all users with role filter - teacher', async (t) => {
         const response = await fastify.inject({
             method: 'GET',
-            url: '/students',
+            url: '/users?role=teacher',
             headers: {
                 authorization: `Bearer ${adminToken}`
             }
@@ -287,17 +289,39 @@ test('User API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
-        assert.ok(data.students)
-        assert.ok(data.students.length >= 2)
+        assert.ok(data.users)
+        assert.ok(data.users.length >= 1)
 
-        // Should have our test students
-        const student1 = data.students.find(s => s.username === 'updatedstudent')
-        const student2 = data.students.find(s => s.username === TEST_STUDENT_2.username)
-        assert.ok(student1)
-        assert.ok(student2)
+        // Verify all returned users are teachers
+        data.users.forEach(user => {
+            assert.strictEqual(user.role, 'teacher')
+            assert.strictEqual(user.password, undefined)
+        })
     })
 
-    // Test 13: Authorization tests - Teacher trying to create teacher (should fail)
+    // Test 10c: Get all users with role filter - student
+    await t.test('Get all users with role filter - student', async (t) => {
+        const response = await fastify.inject({
+            method: 'GET',
+            url: '/users?role=student',
+            headers: {
+                authorization: `Bearer ${adminToken}`
+            }
+        })
+
+        assert.strictEqual(response.statusCode, 200)
+        const data = response.json()
+        assert.ok(data.users)
+        assert.ok(data.users.length >= 2)
+
+        // Verify all returned users are students
+        data.users.forEach(user => {
+            assert.strictEqual(user.role, 'student')
+            assert.strictEqual(user.password, undefined)
+        })
+    })
+
+    // Test 11: Authorization tests - Teacher trying to create teacher (should fail)
     await t.test('Teacher trying to create teacher role (should fail)', async (t) => {
         const response = await fastify.inject({
             method: 'POST',
@@ -317,7 +341,7 @@ test('User API Tests', async (t) => {
         assert.strictEqual(data.message, 'Teachers can only create student accounts')
     })
 
-    // Test 14: Delete user (as admin)
+    // Test 12: Delete user (as admin)
     await t.test('Delete user as admin', async (t) => {
         const response = await fastify.inject({
             method: 'DELETE',
@@ -332,13 +356,13 @@ test('User API Tests', async (t) => {
         assert.strictEqual(data.message, 'User deleted')
     })
 
-    // Test 15: Check user is deleted from database
+    // Test 13: Check user is deleted from database
     await t.test('Check user is deleted from database', async (t) => {
         const user = await User.findById(createdUserId)
         assert.strictEqual(user, null)
     })
 
-    // Test 16: Clean up - remove all test users except admin
+    // Test 14: Clean up - remove all test users except admin
     await t.test('Clean up test data', async (t) => {
         await User.deleteMany({
             username: {$in: ['teacher1', 'student2', 'updatedstudent', 'admin']}
