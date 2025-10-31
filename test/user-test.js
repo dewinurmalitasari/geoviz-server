@@ -341,7 +341,66 @@ test('User API Tests', async (t) => {
         assert.strictEqual(data.message, 'Teachers can only create student accounts')
     })
 
-    // Test 12: Delete user (as admin)
+    // Test 12: Create related data for user and verify deletion cascade
+    await t.test('Verify related data deletion on user delete', async (t) => {
+        const Statistic = (await import('../model/Statistic.js')).default
+        const Practice = (await import('../model/Practice.js')).default
+
+        // Create a temporary test student
+        const tempStudentResponse = await fastify.inject({
+            method: 'POST',
+            url: '/users',
+            headers: {
+                authorization: `Bearer ${teacherToken}`
+            },
+            payload: {
+                username: 'tempstudent',
+                password: 'tempPass123',
+                role: 'student'
+            }
+        })
+
+        const tempStudentId = tempStudentResponse.json().user._id
+
+        // Create some statistics for the user
+        await Statistic.create([
+            { type: 'visit', data: { page: 'home' }, user: tempStudentId },
+            { type: 'material', data: { materialId: 'test123' }, user: tempStudentId },
+            { type: 'practice', data: { practiceId: 'practice123' }, user: tempStudentId }
+        ])
+
+        // Create some practice records for the user
+        await Practice.create([
+            { code: 'TEST001', score: { correct: 8, total: 10 }, user: tempStudentId },
+            { code: 'TEST002', score: { correct: 9, total: 10 }, user: tempStudentId }
+        ])
+
+        // Verify data exists before deletion
+        const statsBeforeDelete = await Statistic.find({ user: tempStudentId })
+        const practicesBeforeDelete = await Practice.find({ user: tempStudentId })
+        assert.strictEqual(statsBeforeDelete.length, 3)
+        assert.strictEqual(practicesBeforeDelete.length, 2)
+
+        // Delete the user
+        const deleteResponse = await fastify.inject({
+            method: 'DELETE',
+            url: `/users/${tempStudentId}`,
+            headers: {
+                authorization: `Bearer ${adminToken}`
+            }
+        })
+
+        assert.strictEqual(deleteResponse.statusCode, 200)
+
+        // Verify related data is deleted
+        const statsAfterDelete = await Statistic.find({ user: tempStudentId })
+        const practicesAfterDelete = await Practice.find({ user: tempStudentId })
+        assert.strictEqual(statsAfterDelete.length, 0, 'Statistics should be deleted')
+        assert.strictEqual(practicesAfterDelete.length, 0, 'Practice records should be deleted')
+    })
+
+
+    // Test 12a: Delete user (as admin)
     await t.test('Delete user as admin', async (t) => {
         const response = await fastify.inject({
             method: 'DELETE',
