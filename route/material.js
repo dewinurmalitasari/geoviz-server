@@ -2,7 +2,7 @@ import Material from "../model/Material.js";
 
 export default async function materialRoutes(fastify) {
     // Get all materials
-    fastify.get('/materials', {
+    fastify.get('/material', {
         preHandler: fastify.authorize(['admin']),
         schema: {
             security: [{ bearerAuth: [] }],
@@ -36,7 +36,7 @@ export default async function materialRoutes(fastify) {
     });
 
     // Get material by ID
-    fastify.get('/materials/:id', {
+    fastify.get('/material/:id', {
         preHandler: fastify.authorize(['admin']),
         schema: {
             security: [{ bearerAuth: [] }],
@@ -85,7 +85,7 @@ export default async function materialRoutes(fastify) {
     });
 
     // Create new material
-    fastify.post('/materials', {
+    fastify.post('/material', {
         preHandler: fastify.authorize(['admin']),
         schema: {
             security: [{ bearerAuth: [] }],
@@ -146,7 +146,7 @@ export default async function materialRoutes(fastify) {
     });
 
     // Update material by ID
-    fastify.put('/materials/:id', {
+    fastify.put('/material/:id', {
         preHandler: fastify.authorize(['admin']),
         schema: {
             security: [{ bearerAuth: [] }],
@@ -236,7 +236,7 @@ export default async function materialRoutes(fastify) {
     });
 
     // Delete material by ID
-    fastify.delete('/materials/:id', {
+    fastify.delete('/material/:id', {
         preHandler: fastify.authorize(['admin']),
         schema: {
             security: [{ bearerAuth: [] }],

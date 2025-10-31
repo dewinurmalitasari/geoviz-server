@@ -3,7 +3,7 @@ import Statistic from "../model/Statistic.js";
 
 export default async function practiceRoute(fastify) {
     // Submit practice
-    fastify.post('/practices', {
+    fastify.post('/practice', {
         preHandler: fastify.authorize(['student']),
         schema: {
             security: [{ bearerAuth: [] }],
@@ -92,7 +92,7 @@ export default async function practiceRoute(fastify) {
     })
 
     // Get practices by user ID
-    fastify.get('/practices/user/:id', {
+    fastify.get('/practice/user/:id', {
         preHandler: fastify.authorize(['admin', 'teacher', 'student']),
         schema: {
             security: [{ bearerAuth: [] }],

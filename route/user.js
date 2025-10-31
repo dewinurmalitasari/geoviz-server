@@ -4,7 +4,7 @@ import Practice from "../model/Practice.js";
 
 export default async function userRoutes(fastify) {
     // Get all users with optional role filter
-    fastify.get('/users', {
+    fastify.get('/user', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
             security: [{ bearerAuth: [] }],
@@ -43,7 +43,7 @@ export default async function userRoutes(fastify) {
 
 
     // Get user by ID
-    fastify.get('/users/:id', {
+    fastify.get('/user/:id', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
             security: [{ bearerAuth: [] }],
@@ -78,7 +78,7 @@ export default async function userRoutes(fastify) {
     })
 
     // Create new user
-    fastify.post('/users', {
+    fastify.post('/user', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
             security: [{ bearerAuth: [] }],
@@ -140,7 +140,7 @@ export default async function userRoutes(fastify) {
     })
 
     // Update user by ID
-    fastify.put('/users/:id', {
+    fastify.put('/user/:id', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
             security: [{ bearerAuth: [] }],
@@ -221,7 +221,7 @@ export default async function userRoutes(fastify) {
     })
 
     // Delete user by ID
-    fastify.delete('/users/:id', {
+    fastify.delete('/user/:id', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
             security: [{ bearerAuth: [] }],

@@ -2,7 +2,7 @@ import Statistic from '../model/Statistic.js'
 
 export default async function statisticRoute(fastify) {
     // Track statistics
-    fastify.post('/statistics', {
+    fastify.post('/statistic', {
         preHandler: fastify.authorize(['student']),
         schema: {
             security: [{ bearerAuth: [] }],
@@ -81,7 +81,7 @@ export default async function statisticRoute(fastify) {
     })
 
     // Get statistics by student id (admin and teacher only)
-    fastify.get('/statistics/user/:id', {
+    fastify.get('/statistic/user/:id', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
             security: [{ bearerAuth: [] }],
