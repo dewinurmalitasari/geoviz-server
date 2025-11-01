@@ -1,4 +1,5 @@
 import Statistic from '../model/Statistic.js'
+import mongoose from "mongoose";
 
 export default async function statisticRoute(fastify) {
     // Track statistics
@@ -113,6 +114,10 @@ export default async function statisticRoute(fastify) {
         }
     }, async (request, reply) => {
         const userId = request.params.id
+
+        if (!mongoose.isValidObjectId(userId)) {
+            return reply.code(404).send({message: 'User not found'})
+        }
 
         const statistics = await Statistic.find({user: userId}).sort({ createdAt: -1 })
         return reply.code(200).send({ message: 'Statistics retrieved successfully', statistics })

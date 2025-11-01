@@ -168,11 +168,11 @@ async function createTeachers() {
             password: 'teacherPass123',
             role: 'teacher'
         })
+        await teacher.save()
         teachers.push(teacher)
         updateProgress('👨‍🏫 Creating teacher users', i, totalTeachers)
     }
 
-    await User.insertMany(teachers)
     return teachers
 }
 
@@ -187,15 +187,11 @@ async function createStudents() {
             password: 'studentPass123',
             role: 'student'
         })
+        await student.save()
         students.push(student)
-
-        // Update progress every 10 students to reduce console spam
-        if (i % 10 === 0 || i === totalStudents) {
-            updateProgress('👨‍🎓 Creating student users', i, totalStudents)
-        }
+        updateProgress('👨‍🎓 Creating student users', i, totalStudents)
     }
 
-    await User.insertMany(students)
     return students
 }
 

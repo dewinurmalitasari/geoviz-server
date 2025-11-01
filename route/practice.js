@@ -1,5 +1,6 @@
 import Practice from "../model/Practice.js";
 import Statistic from "../model/Statistic.js";
+import mongoose from "mongoose";
 
 export default async function practiceRoute(fastify) {
     // Submit practice
@@ -143,6 +144,10 @@ export default async function practiceRoute(fastify) {
         }
     }, async (request, reply) => {
         const { id } = request.params
+
+        if (!mongoose.isValidObjectId(id)) {
+            return reply.code(404).send({ message: 'User not found' })
+        }
 
         // If the requester is a student, ensure they can only access their own practices
         if (request.user.role === 'student' && request.user.id !== id) {

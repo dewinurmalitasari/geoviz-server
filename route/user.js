@@ -1,6 +1,7 @@
 import User from "../model/User.js";
 import Statistic from "../model/Statistic.js";
 import Practice from "../model/Practice.js";
+import mongoose from "mongoose";
 
 export default async function userRoutes(fastify) {
     // Get all users with optional role filter
@@ -72,6 +73,11 @@ export default async function userRoutes(fastify) {
         }
     }, async (request, reply) => {
         const {id} = request.params
+
+        if (!mongoose.isValidObjectId(id)) {
+            return reply.code(404).send({message: 'User not found'})
+        }
+
         const user = await User.findById(id, '-password')
         if (!user) return reply.code(404).send({message: 'User not found'})
         return { message: 'User retrieved successfully', user }
@@ -192,6 +198,10 @@ export default async function userRoutes(fastify) {
         const {username, password, role} = request.body
         const updaterRole = request.user.role
 
+        if (!mongoose.isValidObjectId(id)) {
+            return reply.code(404).send({message: 'User not found'})
+        }
+
         // Role-based restrictions
         if (updaterRole === 'teacher' && role && role !== 'student') {
             return reply.code(403).send({message: 'Teachers can only assign student role'})
@@ -243,6 +253,10 @@ export default async function userRoutes(fastify) {
     }, async (request, reply) => {
         const { id } = request.params
         const currentUserRole = request.user.role
+
+        if (!mongoose.isValidObjectId(id)) {
+            return reply.code(404).send({message: 'User not found'})
+        }
 
         const userToDelete = await User.findById(id)
         if (!userToDelete) {

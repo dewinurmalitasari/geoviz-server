@@ -1,4 +1,5 @@
 import Material from "../model/Material.js";
+import mongoose from "mongoose";
 
 export default async function materialRoutes(fastify) {
     // Get all materials
@@ -75,6 +76,10 @@ export default async function materialRoutes(fastify) {
         }
     }, async (request, reply) => {
         const { id } = request.params;
+
+        if (!mongoose.isValidObjectId(id)) {
+            return reply.code(404).send({ message: 'Material not found' });
+        }
 
         const material = await Material.findById(id);
         if (!material) {
@@ -202,6 +207,10 @@ export default async function materialRoutes(fastify) {
         const { id } = request.params;
         const { title, description, formula, example } = request.body;
 
+        if (!mongoose.isValidObjectId(id)) {
+            return reply.code(404).send({ message: 'Material not found' });
+        }
+
         // Check if material exists
         const material = await Material.findById(id);
         if (!material) {
@@ -263,6 +272,10 @@ export default async function materialRoutes(fastify) {
         }
     }, async (request, reply) => {
         const { id } = request.params;
+
+        if (!mongoose.isValidObjectId(id)) {
+            return reply.code(404).send({ message: 'Material not found' });
+        }
 
         const material = await Material.findByIdAndDelete(id);
         if (!material) {
