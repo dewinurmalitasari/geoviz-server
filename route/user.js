@@ -39,7 +39,7 @@ export default async function userRoutes(fastify) {
         const { role } = request.query;
         const filter = role ? { role } : {};
         const users = await User.find(filter, '-password').sort({ createdAt: -1 }).lean();
-        return { message: 'Users retrieved successfully', users };
+        return { message: 'Pengguna berhasil diambil', users };
     });
 
 
@@ -75,12 +75,12 @@ export default async function userRoutes(fastify) {
         const {id} = request.params
 
         if (!mongoose.isValidObjectId(id)) {
-            return reply.code(404).send({message: 'User not found'})
+            return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
         }
 
         const user = await User.findById(id, '-password')
-        if (!user) return reply.code(404).send({message: 'User not found'})
-        return { message: 'User retrieved successfully', user }
+        if (!user) return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
+        return { message: 'Pengguna berhasil diambil', user }
     })
 
     // Create new user
@@ -132,17 +132,17 @@ export default async function userRoutes(fastify) {
 
         // Role-based restrictions
         if (creatorRole === 'teacher' && role !== 'student') {
-            return reply.code(403).send({message: 'Teachers can only create student accounts'})
+            return reply.code(403).send({message: 'Guru hanya dapat membuat akun siswa'})
         }
 
         // Check if username already exists
         const existingUser = await User.findOne({username})
         if (existingUser) {
-            return reply.code(409).send({message: 'Username already exists'})
+            return reply.code(409).send({message: 'Nama pengguna sudah ada'})
         }
 
         const user = await User.create({username, password, role})
-        reply.code(201).send({ message: 'User created successfully', user: {_id: user._id, username: user.username, role: user.role} })
+        reply.code(201).send({ message: 'Pengguna berhasil dibuat', user: {_id: user._id, username: user.username, role: user.role} })
     })
 
     // Update user by ID
@@ -199,22 +199,22 @@ export default async function userRoutes(fastify) {
         const updaterRole = request.user.role
 
         if (!mongoose.isValidObjectId(id)) {
-            return reply.code(404).send({message: 'User not found'})
+            return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
         }
 
         // Role-based restrictions
         if (updaterRole === 'teacher' && role && role !== 'student') {
-            return reply.code(403).send({message: 'Teachers can only assign student role'})
+            return reply.code(403).send({message: 'Guru hanya dapat memberikan peran siswa'})
         }
 
         const user = await User.findById(id)
-        if (!user) return reply.code(404).send({message: 'User not found'})
+        if (!user) return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
 
         // Check if username is being changed and already exists
         if (username && username !== user.username) {
             const existingUser = await User.findOne({username})
             if (existingUser) {
-                return reply.code(409).send({message: 'Username already exists'})
+                return reply.code(409).send({message: 'Nama pengguna sudah ada'})
             }
         }
 
@@ -227,7 +227,7 @@ export default async function userRoutes(fastify) {
         Object.assign(user, updateData)
         await user.save()
 
-        return { message: 'User updated successfully', user: {_id: user._id, username: user.username, role: user.role} }
+        return { message: 'Pengguna berhasil diperbarui', user: {_id: user._id, username: user.username, role: user.role} }
     })
 
     // Delete user by ID
@@ -255,17 +255,17 @@ export default async function userRoutes(fastify) {
         const currentUserRole = request.user.role
 
         if (!mongoose.isValidObjectId(id)) {
-            return reply.code(404).send({message: 'User not found'})
+            return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
         }
 
         const userToDelete = await User.findById(id)
         if (!userToDelete) {
-            return reply.code(404).send({ message: 'User not found' })
+            return reply.code(404).send({ message: 'Pengguna tidak ditemukan' })
         }
 
         // Teachers can only delete student accounts
         if (currentUserRole === 'teacher' && userToDelete.role !== 'student') {
-            return reply.code(403).send({ message: 'Teachers can only delete student accounts' })
+            return reply.code(403).send({ message: 'Guru hanya dapat menghapus akun siswa' })
         }
 
         const [deleteUserResult] = await Promise.all([
@@ -276,9 +276,9 @@ export default async function userRoutes(fastify) {
 
         // For consistency and just in case
         if (!deleteUserResult) {
-            return reply.code(404).send({ message: 'User not found' })
+            return reply.code(404).send({ message: 'Pengguna tidak ditemukan' })
         }
 
-        return { message: 'User deleted' }
+        return { message: 'Pengguna berhasil dihapus' }
     })
 }

@@ -33,7 +33,7 @@ export default async function materialRoutes(fastify) {
         }
     }, async () => {
         const materials = await Material.find().sort({ createdAt: -1 });
-        return { message: 'Materials retrieved successfully', materials };
+        return { message: 'Materi berhasil diambil', materials };
     });
 
     // Get material by ID
@@ -78,15 +78,15 @@ export default async function materialRoutes(fastify) {
         const { id } = request.params;
 
         if (!mongoose.isValidObjectId(id)) {
-            return reply.code(404).send({ message: 'Material not found' });
+            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
         }
 
         const material = await Material.findById(id);
         if (!material) {
-            return reply.code(404).send({ message: 'Material not found' });
+            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
         }
 
-        return { message: 'Material retrieved successfully', material };
+        return { message: 'Materi berhasil diambil', material };
     });
 
     // Create new material
@@ -137,7 +137,7 @@ export default async function materialRoutes(fastify) {
         // Check if material with same title already exists
         const existingMaterial = await Material.findOne({ title });
         if (existingMaterial) {
-            return reply.code(409).send({ message: 'Material with this title already exists' });
+            return reply.code(409).send({ message: 'Materi dengan judul ini sudah ada' });
         }
 
         const material = await Material.create({
@@ -147,7 +147,7 @@ export default async function materialRoutes(fastify) {
             example
         });
 
-        reply.code(201).send({ message: 'Material created successfully', material });
+        reply.code(201).send({ message: 'Materi berhasil dibuat', material });
     });
 
     // Update material by ID
@@ -208,20 +208,20 @@ export default async function materialRoutes(fastify) {
         const { title, description, formula, example } = request.body;
 
         if (!mongoose.isValidObjectId(id)) {
-            return reply.code(404).send({ message: 'Material not found' });
+            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
         }
 
         // Check if material exists
         const material = await Material.findById(id);
         if (!material) {
-            return reply.code(404).send({ message: 'Material not found' });
+            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
         }
 
         // Check if title is being changed and if it conflicts with existing material
         if (title && title !== material.title) {
             const existingMaterial = await Material.findOne({ title });
             if (existingMaterial) {
-                return reply.code(409).send({ message: 'Material with this title already exists' });
+                return reply.code(409).send({ message: 'Materi dengan judul ini sudah ada' });
             }
         }
 
@@ -239,7 +239,7 @@ export default async function materialRoutes(fastify) {
         );
 
         return {
-            message: 'Material updated successfully',
+            message: 'Materi berhasil diperbarui',
             material: updatedMaterial
         };
     });
@@ -274,14 +274,14 @@ export default async function materialRoutes(fastify) {
         const { id } = request.params;
 
         if (!mongoose.isValidObjectId(id)) {
-            return reply.code(404).send({ message: 'Material not found' });
+            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
         }
 
         const material = await Material.findByIdAndDelete(id);
         if (!material) {
-            return reply.code(404).send({ message: 'Material not found' });
+            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
         }
 
-        return { message: 'Material deleted successfully' };
+        return { message: 'Materi berhasil dihapus' };
     });
 }

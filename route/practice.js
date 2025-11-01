@@ -66,7 +66,7 @@ export default async function practiceRoute(fastify) {
 
         if (score.correct < 0 || score.total < 0) {
             return reply.code(400).send({
-                message: 'Score values cannot be negative'
+                message: 'Nilai skor tidak boleh negatif'
             })
         }
 
@@ -89,7 +89,7 @@ export default async function practiceRoute(fastify) {
         })
         await statistic.save()
 
-        return reply.code(201).send({ message: 'Practice submitted successfully', practice })
+        return reply.code(201).send({ message: 'Latihan berhasil dikirim', practice })
     })
 
     // Get practices by user ID
@@ -146,16 +146,16 @@ export default async function practiceRoute(fastify) {
         const { id } = request.params
 
         if (!mongoose.isValidObjectId(id)) {
-            return reply.code(404).send({ message: 'User not found' })
+            return reply.code(404).send({ message: 'Pengguna tidak ditemukan' })
         }
 
         // If the requester is a student, ensure they can only access their own practices
         if (request.user.role === 'student' && request.user.id !== id) {
-            return reply.code(403).send({ message: 'Forbidden' })
+            return reply.code(403).send({ message: 'Akses ditolak' })
         }
 
         const practices = await Practice.find({ user: id }).sort({ createdAt: -1 })
 
-        return { message: 'Practices retrieved successfully', practices }
+        return { message: 'Latihan berhasil diambil', practices }
     })
 }

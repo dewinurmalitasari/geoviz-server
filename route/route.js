@@ -48,13 +48,13 @@ export default async function routes(fastify, options) {
     }, async (request, reply) => {
         const {username, password} = request.body
         const user = await User.findOne({username})
-        if (!user) return reply.code(401).send({message: 'User not found'})
+        if (!user) return reply.code(401).send({message: 'Pengguna tidak ditemukan'})
 
         const match = await user.comparePassword(password)
-        if (!match) return reply.code(401).send({message: 'Invalid password'})
+        if (!match) return reply.code(401).send({message: 'Kata sandi salah'})
 
         return {
-            message: 'Login successful',
+            message: 'Login berhasil',
             user: {_id: user._id, username: user.username, role: user.role},
             token: fastify.jwt.sign(
                 {id: user._id, role: user.role},

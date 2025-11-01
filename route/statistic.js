@@ -58,27 +58,27 @@ export default async function statisticRoute(fastify) {
         switch (type) {
             case 'visit':
                 if (Object.keys(data).length !== 0) {
-                    return reply.code(400).send({message: 'Visit data must be empty'})
+                    return reply.code(400).send({message: 'Data kunjungan harus kosong'})
                 }
                 break
             case 'material':
                 if (!data.material) {
-                    return reply.code(400).send({message: 'Material ID is required'})
+                    return reply.code(400).send({message: 'ID materi diperlukan'})
                 }
                 break
             case 'practice':
                 if (!data.code || typeof data.code !== 'string') {
-                    return reply.code(400).send({message: 'Practice code is required'})
+                    return reply.code(400).send({message: 'Kode latihan diperlukan'})
                 }
                 break
             default:
-                return reply.code(400).send({message: 'Invalid statistic type'})
+                return reply.code(400).send({message: 'Tipe statistik tidak valid'})
         }
 
         const statistic = new Statistic({type, data: data, user: userId})
         await statistic.save()
 
-        return reply.code(201).send({ message: 'Statistic tracked successfully', statistic })
+        return reply.code(201).send({ message: 'Statistik berhasil dicatat', statistic })
     })
 
     // Get statistics by student id (admin and teacher only)
@@ -116,10 +116,10 @@ export default async function statisticRoute(fastify) {
         const userId = request.params.id
 
         if (!mongoose.isValidObjectId(userId)) {
-            return reply.code(404).send({message: 'User not found'})
+            return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
         }
 
         const statistics = await Statistic.find({user: userId}).sort({ createdAt: -1 })
-        return reply.code(200).send({ message: 'Statistics retrieved successfully', statistics })
+        return reply.code(200).send({ message: 'Statistik berhasil diambil', statistics })
     })
 }
