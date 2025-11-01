@@ -131,7 +131,7 @@ export default async function statisticRoute(fastify) {
 
     // Get statistics summary for a student
     fastify.get('/statistics/summary/user/:id', {
-        preHandler: fastify.authorize(['admin', 'teacher']),
+        preHandler: fastify.authorize(['admin', 'teacher', 'student']),
         schema: {
             security: [{bearerAuth: []}],
             response: {
