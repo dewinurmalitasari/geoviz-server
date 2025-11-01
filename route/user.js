@@ -38,7 +38,7 @@ export default async function userRoutes(fastify) {
     }, async (request) => {
         const { role } = request.query;
         const filter = role ? { role } : {};
-        const users = await User.find(filter, '-password').lean();
+        const users = await User.find(filter, '-password').sort({ createdAt: -1 }).lean();
         return { message: 'Users retrieved successfully', users };
     });
 
