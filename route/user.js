@@ -45,7 +45,7 @@ export default async function userRoutes(fastify) {
 
     // Get user by ID
     fastify.get('/users/:id', {
-        preHandler: fastify.authorize(['admin', 'teacher']),
+        preHandler: fastify.authorize(['admin', 'teacher', 'student']),
         schema: {
             security: [{ bearerAuth: [] }],
             response: {
