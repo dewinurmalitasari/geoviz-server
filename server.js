@@ -17,7 +17,8 @@ const fastify = Fastify({
 if (process.env.DEV_CORS_ORIGIN) {
     fastify.register(cors, {
         origin: process.env.DEV_CORS_ORIGIN,
-        credentials: true
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
     })
 }
 
