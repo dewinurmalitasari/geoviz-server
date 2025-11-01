@@ -121,7 +121,7 @@ const PRACTICE_TOPICS = [
 const STATISTIC_TYPES = {
     VISIT: 'visit',
     MATERIAL: 'material',
-    PRACTICE: 'practice',
+    PRACTICE_ATTEMPT: 'practice_attempt',
     PRACTICE_COMPLETED: 'practice_completed'
 }
 
@@ -133,6 +133,20 @@ async function connectDB() {
     } catch (error) {
         console.error('❌ MongoDB connection error:', error)
         process.exit(1)
+    }
+}
+
+async function dropAllIndexes() {
+    try {
+        await Promise.all([
+            Practice.collection.dropIndexes(),
+            User.collection.dropIndexes(),
+            Material.collection.dropIndexes(),
+            Statistic.collection.dropIndexes()
+        ])
+        console.log('✅ Dropped all indexes from all collections')
+    } catch (error) {
+        console.warn('⚠️  Error dropping indexes:', error.message)
     }
 }
 
@@ -158,7 +172,7 @@ async function createAdmin() {
 }
 
 async function createTeachers() {
-    const totalTeachers = 20
+    const totalTeachers = 5
     startProgress('👨‍🏫 Creating teacher users', totalTeachers)
 
     const teachers = []
@@ -177,7 +191,7 @@ async function createTeachers() {
 }
 
 async function createStudents() {
-    const totalStudents = 200
+    const totalStudents = 30
     startProgress('👨‍🎓 Creating student users', totalStudents)
 
     const students = []
@@ -279,8 +293,8 @@ async function createPracticesAndStatistics(students, materials) {
 }
 
 async function createGeneralStatistics(student, materials, statistics) {
-    // Create visit statistics (2-4 per student)
-    const visitCount = Math.floor(Math.random() * 3) + 2
+    // Create visit statistics (10-20 per student)
+    const visitCount = Math.floor(Math.random() * 11) + 10
     for (let i = 0; i < visitCount; i++) {
         const visitStat = new Statistic({
             type: STATISTIC_TYPES.VISIT,
@@ -290,8 +304,8 @@ async function createGeneralStatistics(student, materials, statistics) {
         statistics.push(visitStat)
     }
 
-    // Create material view statistics (3-6 per student)
-    const materialViewCount = Math.floor(Math.random() * 4) + 3
+    // Create material view statistics (15-25 per student)
+    const materialViewCount = Math.floor(Math.random() * 11) + 15
     for (let i = 0; i < materialViewCount; i++) {
         const material = materials[Math.floor(Math.random() * materials.length)]
         const materialStat = new Statistic({
@@ -304,12 +318,12 @@ async function createGeneralStatistics(student, materials, statistics) {
         statistics.push(materialStat)
     }
 
-    // Create practice start statistics (1-3 per student)
-    const practiceStartCount = Math.floor(Math.random() * 3) + 1
+    // Create practice start statistics (10-15 per student)
+    const practiceStartCount = Math.floor(Math.random() * 6) + 10
     for (let i = 0; i < practiceStartCount; i++) {
         const topic = PRACTICE_TOPICS[Math.floor(Math.random() * PRACTICE_TOPICS.length)]
         const practiceStat = new Statistic({
-            type: STATISTIC_TYPES.PRACTICE,
+            type: STATISTIC_TYPES.PRACTICE_ATTEMPT,
             data: {
                 code: topic.code
             },
@@ -326,6 +340,7 @@ async function seedDatabase() {
 
     try {
         await connectDB()
+        await dropAllIndexes()
         await clearDatabase()
 
         const admin = await createAdmin()
@@ -341,7 +356,7 @@ async function seedDatabase() {
         const statTypes = {
             visit: statistics.filter(s => s.type === STATISTIC_TYPES.VISIT).length,
             material: statistics.filter(s => s.type === STATISTIC_TYPES.MATERIAL).length,
-            practice: statistics.filter(s => s.type === STATISTIC_TYPES.PRACTICE).length,
+            practice: statistics.filter(s => s.type === STATISTIC_TYPES.PRACTICE_ATTEMPT).length,
             practice_completed: statistics.filter(s => s.type === STATISTIC_TYPES.PRACTICE_COMPLETED).length
         }
 
@@ -368,7 +383,7 @@ async function seedDatabase() {
         console.log('\n📋 Statistic Data Structure:')
         console.log('   - visit: {}')
         console.log('   - material: { material: ObjectId }')
-        console.log('   - practice: { code: String }')
+        console.log('   - practice_attempt: { code: String }')
         console.log('   - practice_completed: { code: String, practice: ObjectId }')
 
     } catch (error) {
