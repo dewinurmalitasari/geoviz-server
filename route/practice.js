@@ -97,6 +97,12 @@ export default async function practiceRoute(fastify) {
         preHandler: fastify.authorize(['admin', 'teacher', 'student']),
         schema: {
             security: [{ bearerAuth: [] }],
+            querystring: {
+                type: 'object',
+                properties: {
+                    noContent: { type: 'boolean' }
+                }
+            },
             params: {
                 type: 'object',
                 properties: {
@@ -144,6 +150,7 @@ export default async function practiceRoute(fastify) {
         }
     }, async (request, reply) => {
         const { id } = request.params
+        const { noContent } = request.query
 
         if (!mongoose.isValidObjectId(id)) {
             return reply.code(404).send({ message: 'Pengguna tidak ditemukan' })
@@ -154,8 +161,12 @@ export default async function practiceRoute(fastify) {
             return reply.code(403).send({ message: 'Akses ditolak' })
         }
 
-        const practices = await Practice.find({ user: id }).sort({ createdAt: -1 })
+        if (noContent) {
+            const practices = await Practice.find({ user: id }, { content: 0, user: 0 }).sort({ createdAt: -1 })
+            return { message: 'Latihan berhasil diambil', practices }
+        }
 
+        const practices = await Practice.find({ user: id }, { user: 0 }).sort({ createdAt: -1 })
         return { message: 'Latihan berhasil diambil', practices }
     })
 }
