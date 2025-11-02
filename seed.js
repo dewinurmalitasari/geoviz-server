@@ -311,7 +311,8 @@ async function createGeneralStatistics(student, materials, statistics) {
         const materialStat = new Statistic({
             type: STATISTIC_TYPES.MATERIAL,
             data: {
-                material: material._id
+                material: material._id,
+                title: material.title // Added title field to match new schema requirement
             },
             user: student._id
         })
@@ -382,7 +383,7 @@ async function seedDatabase() {
 
         console.log('\n📋 Statistic Data Structure:')
         console.log('   - visit: {}')
-        console.log('   - material: { material: ObjectId }')
+        console.log('   - material: { material: ObjectId, title: String }') // Updated to show new structure
         console.log('   - practice_attempt: { code: String }')
         console.log('   - practice_completed: { code: String, practice: ObjectId }')
 
