@@ -132,6 +132,94 @@ export default async function statisticRoute(fastify) {
         return reply.code(200).send({message: 'Statistik berhasil diambil', statistics})
     })
 
+    // Get progress statistics for a student (optimized)
+    fastify.get('/statistics/progress/user/:id', {
+        preHandler: fastify.authorize(['admin', 'teacher', 'student']),
+        schema: {
+            security: [{bearerAuth: []}],
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'},
+                        progress: {
+                            type: 'object',
+                            properties: {
+                                totalMaterialsAvailable: {type: 'number'},
+                                totalMaterialsAccessed: {type: 'number'},
+                                totalPracticesAvailable: {type: 'number'},
+                                totalPracticesCompleted: {type: 'number'},
+                                completionRateMaterials: {type: 'number'},
+                                completionRatePractices: {type: 'number'}
+                            }
+                        }
+                    }
+                },
+                404: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        const userId = request.params.id
+
+        if (!mongoose.isValidObjectId(userId)) {
+            return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
+        }
+
+        // Get total counts and user progress in parallel
+        const [totalMaterialsAvailable, totalPracticesAvailable, progressStats] = await Promise.all([
+            mongoose.model('Material').countDocuments(),
+            mongoose.model('Practice').distinct('code').then(codes => codes.length),
+            Statistic.aggregate([
+                {$match: {user: new mongoose.Types.ObjectId(userId)}},
+                {
+                    $group: {
+                        _id: '$type',
+                        uniqueItems: {
+                            $addToSet: {
+                                $cond: [
+                                    {$eq: ['$type', 'material']},
+                                    '$data.material',
+                                    {$cond: [{$eq: ['$type', 'practice_completed']}, '$data.code', null]}
+                                ]
+                            }
+                        }
+                    }
+                }
+            ])
+        ])
+
+        const materialStat = progressStats.find(s => s._id === 'material')
+        const practiceStat = progressStats.find(s => s._id === 'practice_completed')
+
+        const totalMaterialsAccessed = materialStat
+            ? materialStat.uniqueItems.filter(m => m !== null).length
+            : 0
+        const totalPracticesCompleted = practiceStat
+            ? practiceStat.uniqueItems.filter(p => p !== null).length
+            : 0
+
+        return reply.code(200).send({
+            message: 'Progress statistik berhasil diambil',
+            progress: {
+                totalMaterialsAvailable,
+                totalMaterialsAccessed,
+                totalPracticesAvailable,
+                totalPracticesCompleted,
+                completionRateMaterials: totalMaterialsAvailable > 0
+                    ? (totalMaterialsAccessed / totalMaterialsAvailable) * 100
+                    : 0,
+                completionRatePractices: totalPracticesAvailable > 0
+                    ? (totalPracticesCompleted / totalPracticesAvailable) * 100
+                    : 0
+            }
+        })
+    })
+
     // Get statistics summary for a student
     fastify.get('/statistics/summary/user/:id', {
         preHandler: fastify.authorize(['admin', 'teacher', 'student']),
@@ -186,41 +274,41 @@ export default async function statisticRoute(fastify) {
             return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
         }
 
-        const stats = await Statistic.aggregate([
-            {$match: {user: new mongoose.Types.ObjectId(userId)}},
-            {
-                $facet: {
-                    typeCounts: [
-                        {$group: {_id: '$type', count: {$sum: 1}}}
-                    ],
-                    materialCounts: [
-                        {$match: {type: 'material'}},
-                        {$group: {_id: '$data.material', count: {$sum: 1}}}
-                    ],
-                    practiceCounts: [
-                        {$match: {$or: [{type: 'practice_attempt'}, {type: 'practice_completed'}]}},
-                        {
-                            $group: {
-                                _id: '$data.code',
-                                attempted: {$sum: {$cond: [{$eq: ['$type', 'practice_attempt']}, 1, 0]}},
-                                completed: {$sum: {$cond: [{$eq: ['$type', 'practice_completed']}, 1, 0]}}
-                            }
-                        }
-                    ]
-                }
-            }
-        ])
-
-        // Get ALL available materials and practices from your database
-        const [allMaterials, allPracticeCodes] = await Promise.all([
+        // Get total counts and user statistics in parallel
+        const [totalMaterialsAvailable, totalPracticesAvailable, allMaterials, allPracticeCodes, stats] = await Promise.all([
+            mongoose.model('Material').countDocuments(),
+            mongoose.model('Practice').distinct('code').then(codes => codes.length),
             mongoose.model('Material').find({}, '_id title'),
-            mongoose.model('Practice').distinct('code')
+            mongoose.model('Practice').distinct('code'),
+            Statistic.aggregate([
+                {$match: {user: new mongoose.Types.ObjectId(userId)}},
+                {
+                    $facet: {
+                        typeCounts: [
+                            {$group: {_id: '$type', count: {$sum: 1}}}
+                        ],
+                        materialCounts: [
+                            {$match: {type: 'material'}},
+                            {$group: {_id: '$data.material', count: {$sum: 1}}}
+                        ],
+                        practiceCounts: [
+                            {$match: {$or: [{type: 'practice_attempt'}, {type: 'practice_completed'}]}},
+                            {
+                                $group: {
+                                    _id: '$data.code',
+                                    attempted: {$sum: {$cond: [{$eq: ['$type', 'practice_attempt']}, 1, 0]}},
+                                    completed: {$sum: {$cond: [{$eq: ['$type', 'practice_completed']}, 1, 0]}}
+                                }
+                            }
+                        ]
+                    }
+                }
+            ])
         ])
 
         const result = stats[0]
         const typeCounts = Object.fromEntries(result.typeCounts.map(t => [t._id, t.count]))
 
-        // Create material access count including ALL materials
         const materialAccessCount = {}
         allMaterials.forEach(material => {
             const materialId = material._id.toString()
@@ -228,7 +316,6 @@ export default async function statisticRoute(fastify) {
             materialAccessCount[material.title] = userMaterial ? userMaterial.count : 0
         })
 
-        // Create practice count including ALL practices
         const practiceCount = {}
         allPracticeCodes.forEach(practiceCode => {
             const userPractice = result.practiceCounts.find(p => p._id === practiceCode)
@@ -238,25 +325,26 @@ export default async function statisticRoute(fastify) {
             }
         })
 
-        // Count of practices that have been completed at least once
         const completedPracticesCount = Object.values(practiceCount).filter(p => p.completed > 0).length
-        const attemptedPracticesCount = Object.values(practiceCount).filter(p => p.attempted > 0).length
+        const accessedMaterialsCount = Object.values(materialAccessCount).filter(count => count > 0).length
 
         return reply.code(200).send({
             message: 'Ringkasan statistik berhasil diambil',
             summary: {
                 totalVisits: typeCounts.visit || 0,
-                totalMaterialsAvailable: allMaterials.length,
+                totalMaterialsAvailable,
                 totalMaterialsAccessed: typeCounts.material || 0,
-                totalPracticesAvailable: allPracticeCodes.length,
+                totalPracticesAvailable,
                 totalPracticeAttempts: result.practiceCounts.reduce((sum, p) => sum + p.attempted, 0),
                 totalPracticesCompleted: result.practiceCounts.reduce((sum, p) => sum + p.completed, 0),
                 materialAccessCount,
                 practiceCount,
-                completionRateMaterials: allMaterials.length > 0 ?
-                    (attemptedPracticesCount / allMaterials.length) * 100 : 0,
-                completionRatePractices: allPracticeCodes.length > 0 ?
-                    (completedPracticesCount / allPracticeCodes.length) * 100 : 0
+                completionRateMaterials: totalMaterialsAvailable > 0
+                    ? (accessedMaterialsCount / totalMaterialsAvailable) * 100
+                    : 0,
+                completionRatePractices: totalPracticesAvailable > 0
+                    ? (completedPracticesCount / totalPracticesAvailable) * 100
+                    : 0
             }
         })
     })
