@@ -41,11 +41,11 @@ export default async function materialRoutes(fastify) {
         const { noFormulaAndExample } = request.query;
 
         if (noFormulaAndExample) {
-            const materials = await Material.find().select('-formula -example').sort({ createdAt: -1 });
+            const materials = await Material.find().select('-formula -example');
             return { message: 'Materi berhasil diambil', materials };
         }
 
-        const materials = await Material.find().sort({ createdAt: -1 });
+        const materials = await Material.find();
         return { message: 'Materi berhasil diambil', materials };
     });
 
