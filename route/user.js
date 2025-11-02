@@ -8,26 +8,26 @@ export default async function userRoutes(fastify) {
     fastify.get('/users', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
-            security: [{ bearerAuth: [] }],
+            security: [{bearerAuth: []}],
             querystring: {
                 type: 'object',
                 properties: {
-                    role: { type: 'string', enum: ['admin', 'teacher', 'student'] }
+                    role: {type: 'string', enum: ['admin', 'teacher', 'student']}
                 }
             },
             response: {
                 200: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' },
+                        message: {type: 'string'},
                         users: {
                             type: 'array',
                             items: {
                                 type: 'object',
                                 properties: {
-                                    _id: { type: 'string' },
-                                    username: { type: 'string' },
-                                    role: { type: 'string' }
+                                    _id: {type: 'string'},
+                                    username: {type: 'string'},
+                                    role: {type: 'string'}
                                 }
                             }
                         }
@@ -36,10 +36,10 @@ export default async function userRoutes(fastify) {
             }
         }
     }, async (request) => {
-        const { role } = request.query;
-        const filter = role ? { role } : {};
-        const users = await User.find(filter, '-password').sort({ createdAt: -1 }).lean();
-        return { message: 'Pengguna berhasil diambil', users };
+        const {role} = request.query;
+        const filter = role ? {role} : {};
+        const users = await User.find(filter, '-password').sort({createdAt: -1}).lean();
+        return {message: 'Pengguna berhasil diambil', users};
     });
 
 
@@ -47,12 +47,12 @@ export default async function userRoutes(fastify) {
     fastify.get('/users/:id', {
         preHandler: fastify.authorize(['admin', 'teacher', 'student']),
         schema: {
-            security: [{ bearerAuth: [] }],
+            security: [{bearerAuth: []}],
             response: {
                 200: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' },
+                        message: {type: 'string'},
                         user: {
                             type: 'object',
                             properties: {
@@ -78,16 +78,16 @@ export default async function userRoutes(fastify) {
             return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
         }
 
-        const user = await User.findById(id, '-password')
+        const user = await User.findById(id, '-password').lean()
         if (!user) return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
-        return { message: 'Pengguna berhasil diambil', user }
+        return {message: 'Pengguna berhasil diambil', user}
     })
 
     // Create new user
     fastify.post('/users', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
-            security: [{ bearerAuth: [] }],
+            security: [{bearerAuth: []}],
             body: {
                 type: 'object',
                 required: ['username', 'password', 'role'],
@@ -101,7 +101,7 @@ export default async function userRoutes(fastify) {
                 201: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' },
+                        message: {type: 'string'},
                         user: {
                             type: 'object',
                             properties: {
@@ -142,14 +142,17 @@ export default async function userRoutes(fastify) {
         }
 
         const user = await User.create({username, password, role})
-        reply.code(201).send({ message: 'Pengguna berhasil dibuat', user: {_id: user._id, username: user.username, role: user.role} })
+        reply.code(201).send({
+            message: 'Pengguna berhasil dibuat',
+            user: {_id: user._id, username: user.username, role: user.role}
+        })
     })
 
     // Update user by ID
     fastify.put('/users/:id', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
-            security: [{ bearerAuth: [] }],
+            security: [{bearerAuth: []}],
             body: {
                 type: 'object',
                 properties: {
@@ -162,7 +165,7 @@ export default async function userRoutes(fastify) {
                 200: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' },
+                        message: {type: 'string'},
                         user: {
                             type: 'object',
                             properties: {
@@ -227,14 +230,17 @@ export default async function userRoutes(fastify) {
         Object.assign(user, updateData)
         await user.save()
 
-        return { message: 'Pengguna berhasil diperbarui', user: {_id: user._id, username: user.username, role: user.role} }
+        return {
+            message: 'Pengguna berhasil diperbarui',
+            user: {_id: user._id, username: user.username, role: user.role}
+        }
     })
 
     // Delete user by ID
     fastify.delete('/users/:id', {
         preHandler: fastify.authorize(['admin', 'teacher']),
         schema: {
-            security: [{ bearerAuth: [] }],
+            security: [{bearerAuth: []}],
             response: {
                 200: {
                     type: 'object',
@@ -251,7 +257,7 @@ export default async function userRoutes(fastify) {
             }
         }
     }, async (request, reply) => {
-        const { id } = request.params
+        const {id} = request.params
         const currentUserRole = request.user.role
 
         if (!mongoose.isValidObjectId(id)) {
@@ -260,25 +266,25 @@ export default async function userRoutes(fastify) {
 
         const userToDelete = await User.findById(id)
         if (!userToDelete) {
-            return reply.code(404).send({ message: 'Pengguna tidak ditemukan' })
+            return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
         }
 
         // Teachers can only delete student accounts
         if (currentUserRole === 'teacher' && userToDelete.role !== 'student') {
-            return reply.code(403).send({ message: 'Guru hanya dapat menghapus akun siswa' })
+            return reply.code(403).send({message: 'Guru hanya dapat menghapus akun siswa'})
         }
 
         const [deleteUserResult] = await Promise.all([
             User.findByIdAndDelete(id),
-            Statistic.deleteMany({ user: id }),
-            Practice.deleteMany({ user: id })
+            Statistic.deleteMany({user: id}),
+            Practice.deleteMany({user: id})
         ])
 
         // For consistency and just in case
         if (!deleteUserResult) {
-            return reply.code(404).send({ message: 'Pengguna tidak ditemukan' })
+            return reply.code(404).send({message: 'Pengguna tidak ditemukan'})
         }
 
-        return { message: 'Pengguna berhasil dihapus' }
+        return {message: 'Pengguna berhasil dihapus'}
     })
 }

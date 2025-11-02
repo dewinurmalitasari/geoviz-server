@@ -6,30 +6,30 @@ export default async function materialRoutes(fastify) {
     fastify.get('/materials', {
         preHandler: fastify.authorize(['admin', 'teacher', 'student']),
         schema: {
-            security: [{ bearerAuth: [] }],
+            security: [{bearerAuth: []}],
             querystring: {
                 type: 'object',
                 properties: {
-                    noFormulaAndExample: { type: 'boolean' }
+                    noFormulaAndExample: {type: 'boolean'}
                 }
             },
             response: {
                 200: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' },
+                        message: {type: 'string'},
                         materials: {
                             type: 'array',
                             items: {
                                 type: 'object',
                                 properties: {
-                                    _id: { type: 'string' },
-                                    title: { type: 'string' },
-                                    description: { type: 'string' },
-                                    formula: { type: 'string' },
-                                    example: { type: 'string' },
-                                    createdAt: { type: 'string' },
-                                    updatedAt: { type: 'string' }
+                                    _id: {type: 'string'},
+                                    title: {type: 'string'},
+                                    description: {type: 'string'},
+                                    formula: {type: 'string'},
+                                    example: {type: 'string'},
+                                    createdAt: {type: 'string'},
+                                    updatedAt: {type: 'string'}
                                 }
                             }
                         }
@@ -38,43 +38,43 @@ export default async function materialRoutes(fastify) {
             }
         }
     }, async (request) => {
-        const { noFormulaAndExample } = request.query;
+        const {noFormulaAndExample} = request.query;
 
         if (noFormulaAndExample) {
-            const materials = await Material.find().select('-formula -example');
-            return { message: 'Materi berhasil diambil', materials };
+            const materials = await Material.find().select('-formula -example').lean();
+            return {message: 'Materi berhasil diambil', materials};
         }
 
-        const materials = await Material.find();
-        return { message: 'Materi berhasil diambil', materials };
+        const materials = await Material.find().lean();
+        return {message: 'Materi berhasil diambil', materials};
     });
 
     // Get material by ID
     fastify.get('/materials/:id', {
         preHandler: fastify.authorize(['admin', 'teacher', 'student']),
         schema: {
-            security: [{ bearerAuth: [] }],
+            security: [{bearerAuth: []}],
             params: {
                 type: 'object',
                 properties: {
-                    id: { type: 'string' }
+                    id: {type: 'string'}
                 }
             },
             response: {
                 200: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' },
+                        message: {type: 'string'},
                         material: {
                             type: 'object',
                             properties: {
-                                _id: { type: 'string' },
-                                title: { type: 'string' },
-                                description: { type: 'string' },
-                                formula: { type: 'string' },
-                                example: { type: 'string' },
-                                createdAt: { type: 'string' },
-                                updatedAt: { type: 'string' }
+                                _id: {type: 'string'},
+                                title: {type: 'string'},
+                                description: {type: 'string'},
+                                formula: {type: 'string'},
+                                example: {type: 'string'},
+                                createdAt: {type: 'string'},
+                                updatedAt: {type: 'string'}
                             }
                         }
                     }
@@ -82,56 +82,56 @@ export default async function materialRoutes(fastify) {
                 404: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' }
+                        message: {type: 'string'}
                     }
                 }
             }
         }
     }, async (request, reply) => {
-        const { id } = request.params;
+        const {id} = request.params;
 
         if (!mongoose.isValidObjectId(id)) {
-            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
+            return reply.code(404).send({message: 'Materi tidak ditemukan'});
         }
 
-        const material = await Material.findById(id);
+        const material = await Material.findById(id).lean();
         if (!material) {
-            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
+            return reply.code(404).send({message: 'Materi tidak ditemukan'});
         }
 
-        return { message: 'Materi berhasil diambil', material };
+        return {message: 'Materi berhasil diambil', material};
     });
 
     // Create new material
     fastify.post('/materials', {
         preHandler: fastify.authorize(['admin']),
         schema: {
-            security: [{ bearerAuth: [] }],
+            security: [{bearerAuth: []}],
             body: {
                 type: 'object',
                 required: ['title', 'description', 'formula', 'example'],
                 properties: {
-                    title: { type: 'string', minLength: 1, maxLength: 255 },
-                    description: { type: 'string', minLength: 1 },
-                    formula: { type: 'string', minLength: 1 },
-                    example: { type: 'string', minLength: 1 }
+                    title: {type: 'string', minLength: 1, maxLength: 255},
+                    description: {type: 'string', minLength: 1},
+                    formula: {type: 'string', minLength: 1},
+                    example: {type: 'string', minLength: 1}
                 }
             },
             response: {
                 201: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' },
+                        message: {type: 'string'},
                         material: {
                             type: 'object',
                             properties: {
-                                _id: { type: 'string' },
-                                title: { type: 'string' },
-                                description: { type: 'string' },
-                                formula: { type: 'string' },
-                                example: { type: 'string' },
-                                createdAt: { type: 'string' },
-                                updatedAt: { type: 'string' }
+                                _id: {type: 'string'},
+                                title: {type: 'string'},
+                                description: {type: 'string'},
+                                formula: {type: 'string'},
+                                example: {type: 'string'},
+                                createdAt: {type: 'string'},
+                                updatedAt: {type: 'string'}
                             }
                         }
                     }
@@ -139,18 +139,18 @@ export default async function materialRoutes(fastify) {
                 409: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' }
+                        message: {type: 'string'}
                     }
                 }
             }
         }
     }, async (request, reply) => {
-        const { title, description, formula, example } = request.body;
+        const {title, description, formula, example} = request.body;
 
         // Check if material with same title already exists
-        const existingMaterial = await Material.findOne({ title });
+        const existingMaterial = await Material.findOne({title});
         if (existingMaterial) {
-            return reply.code(409).send({ message: 'Materi dengan judul ini sudah ada' });
+            return reply.code(409).send({message: 'Materi dengan judul ini sudah ada'});
         }
 
         const material = await Material.create({
@@ -160,44 +160,44 @@ export default async function materialRoutes(fastify) {
             example
         });
 
-        reply.code(201).send({ message: 'Materi berhasil dibuat', material });
+        reply.code(201).send({message: 'Materi berhasil dibuat', material});
     });
 
     // Update material by ID
     fastify.put('/materials/:id', {
         preHandler: fastify.authorize(['admin']),
         schema: {
-            security: [{ bearerAuth: [] }],
+            security: [{bearerAuth: []}],
             params: {
                 type: 'object',
                 properties: {
-                    id: { type: 'string' }
+                    id: {type: 'string'}
                 }
             },
             body: {
                 type: 'object',
                 properties: {
-                    title: { type: 'string', minLength: 1, maxLength: 255 },
-                    description: { type: 'string', minLength: 1 },
-                    formula: { type: 'string', minLength: 1 },
-                    example: { type: 'string', minLength: 1 }
+                    title: {type: 'string', minLength: 1, maxLength: 255},
+                    description: {type: 'string', minLength: 1},
+                    formula: {type: 'string', minLength: 1},
+                    example: {type: 'string', minLength: 1}
                 }
             },
             response: {
                 200: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' },
+                        message: {type: 'string'},
                         material: {
                             type: 'object',
                             properties: {
-                                _id: { type: 'string' },
-                                title: { type: 'string' },
-                                description: { type: 'string' },
-                                formula: { type: 'string' },
-                                example: { type: 'string' },
-                                createdAt: { type: 'string' },
-                                updatedAt: { type: 'string' }
+                                _id: {type: 'string'},
+                                title: {type: 'string'},
+                                description: {type: 'string'},
+                                formula: {type: 'string'},
+                                example: {type: 'string'},
+                                createdAt: {type: 'string'},
+                                updatedAt: {type: 'string'}
                             }
                         }
                     }
@@ -205,36 +205,36 @@ export default async function materialRoutes(fastify) {
                 404: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' }
+                        message: {type: 'string'}
                     }
                 },
                 409: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' }
+                        message: {type: 'string'}
                     }
                 }
             }
         }
     }, async (request, reply) => {
-        const { id } = request.params;
-        const { title, description, formula, example } = request.body;
+        const {id} = request.params;
+        const {title, description, formula, example} = request.body;
 
         if (!mongoose.isValidObjectId(id)) {
-            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
+            return reply.code(404).send({message: 'Materi tidak ditemukan'});
         }
 
         // Check if material exists
         const material = await Material.findById(id);
         if (!material) {
-            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
+            return reply.code(404).send({message: 'Materi tidak ditemukan'});
         }
 
         // Check if title is being changed and if it conflicts with existing material
         if (title && title !== material.title) {
-            const existingMaterial = await Material.findOne({ title });
+            const existingMaterial = await Material.findOne({title});
             if (existingMaterial) {
-                return reply.code(409).send({ message: 'Materi dengan judul ini sudah ada' });
+                return reply.code(409).send({message: 'Materi dengan judul ini sudah ada'});
             }
         }
 
@@ -248,7 +248,7 @@ export default async function materialRoutes(fastify) {
         const updatedMaterial = await Material.findByIdAndUpdate(
             id,
             updateData,
-            { new: true, runValidators: true }
+            {new: true, runValidators: true}
         );
 
         return {
@@ -261,40 +261,40 @@ export default async function materialRoutes(fastify) {
     fastify.delete('/materials/:id', {
         preHandler: fastify.authorize(['admin']),
         schema: {
-            security: [{ bearerAuth: [] }],
+            security: [{bearerAuth: []}],
             params: {
                 type: 'object',
                 properties: {
-                    id: { type: 'string' }
+                    id: {type: 'string'}
                 }
             },
             response: {
                 200: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' }
+                        message: {type: 'string'}
                     }
                 },
                 404: {
                     type: 'object',
                     properties: {
-                        message: { type: 'string' }
+                        message: {type: 'string'}
                     }
                 }
             }
         }
     }, async (request, reply) => {
-        const { id } = request.params;
+        const {id} = request.params;
 
         if (!mongoose.isValidObjectId(id)) {
-            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
+            return reply.code(404).send({message: 'Materi tidak ditemukan'});
         }
 
         const material = await Material.findByIdAndDelete(id);
         if (!material) {
-            return reply.code(404).send({ message: 'Materi tidak ditemukan' });
+            return reply.code(404).send({message: 'Materi tidak ditemukan'});
         }
 
-        return { message: 'Materi berhasil dihapus' };
+        return {message: 'Materi berhasil dihapus'};
     });
 }
