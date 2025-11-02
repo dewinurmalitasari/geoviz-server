@@ -39,12 +39,13 @@ const TEST_VISIT_STAT = {
 const TEST_MATERIAL_STAT = {
     type: 'material',
     data: {
-        material: '507f1f77bcf86cd799439011' // Example material ID
+        material: '507f1f77bcf86cd799439011', // Example material ID
+        title: 'Test Material'
     }
 }
 
 const TEST_PRACTICE_STAT = {
-    type: 'practice',
+    type: 'practice_attempt',
     data: {
         code: 'algebra_basics_001'
     }
@@ -305,7 +306,7 @@ test('Statistic API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 400)
         const data = response.json()
-        assert.strictEqual(data.message, 'Visit data must be empty')
+        assert.strictEqual(data.message, 'Data kunjungan harus kosong')
     })
 
     // Test 14: Track material statistic without material ID (should fail)
@@ -324,7 +325,7 @@ test('Statistic API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 400)
         const data = response.json()
-        assert.strictEqual(data.message, 'Material ID is required')
+        assert.strictEqual(data.message, 'ID materi diperlukan')
     })
 
     // Test 15: Track practice statistic without code (should fail)
@@ -336,14 +337,14 @@ test('Statistic API Tests', async (t) => {
                 authorization: `Bearer ${studentToken}`
             },
             payload: {
-                type: 'practice',
+                type: 'practice_attempt',
                 data: {} // Missing code
             }
         })
 
         assert.strictEqual(response.statusCode, 400)
         const data = response.json()
-        assert.strictEqual(data.message, 'Practice code is required')
+        assert.strictEqual(data.message, 'Kode latihan diperlukan')
     })
 
     // Test 16: Track practice_completed statistic manually (should fail based on current schema)
@@ -494,7 +495,7 @@ test('Statistic API Tests', async (t) => {
 
         assert.strictEqual(visitStats.length, 1)
         assert.strictEqual(materialStats.length, 1)
-        assert.strictEqual(practiceStats.length, 1)
+        assert.strictEqual(practiceStats.length, 0)
     })
 
     // Test 23: Check statistic data structure for different types

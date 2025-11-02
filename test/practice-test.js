@@ -372,7 +372,7 @@ test('Practice API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 403)
         const data = response.json()
-        assert.strictEqual(data.message, 'Forbidden')
+        assert.strictEqual(data.message, 'Akses ditolak')
     })
 
     // Test 16: Get practices for non-existent user ID
@@ -402,9 +402,9 @@ test('Practice API Tests', async (t) => {
             }
         })
 
-        assert.strictEqual(response.statusCode, 500)
+        assert.strictEqual(response.statusCode, 404)
         const data = response.json()
-        assert.ok(data.message.includes('Cast to ObjectId failed'))
+        assert.strictEqual(data.message, 'Pengguna tidak ditemukan')
     })
 
     // Test 18: Submit practice as student 2

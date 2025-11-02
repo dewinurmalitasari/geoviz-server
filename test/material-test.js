@@ -53,7 +53,7 @@ let createdMaterialId
 let secondMaterialId
 
 test('Material API Tests', async (t) => {
-    // Setup: Create Fastify instance and ensure admin exists
+    // Setup: Create Fastify instance and ensure test users exist
     await t.test('Setup - Initialize server and ensure test users exist', async (t) => {
         fastify = await build()
 
@@ -143,6 +143,7 @@ test('Material API Tests', async (t) => {
         assert.strictEqual(data.material.description, TEST_MATERIAL.description)
         assert.strictEqual(data.material.formula, TEST_MATERIAL.formula)
         assert.strictEqual(data.material.example, TEST_MATERIAL.example)
+        assert.strictEqual(data.message, 'Materi berhasil dibuat')
         assert.ok(data.material._id)
         assert.ok(data.material.createdAt)
 
@@ -162,7 +163,7 @@ test('Material API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 409)
         const data = response.json()
-        assert.strictEqual(data.message, 'Material with this title already exists')
+        assert.strictEqual(data.message, 'Materi dengan judul ini sudah ada')
     })
 
     // Test 6: Create material as teacher (should fail - unauthorized)
@@ -218,6 +219,7 @@ test('Material API Tests', async (t) => {
         assert.strictEqual(response.statusCode, 201)
         const data = response.json()
         assert.strictEqual(data.material.title, TEST_MATERIAL_2.title)
+        assert.strictEqual(data.message, 'Materi berhasil dibuat')
         secondMaterialId = data.material._id
     })
 
@@ -233,6 +235,7 @@ test('Material API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
+        assert.strictEqual(data.message, 'Materi berhasil diambil')
         assert.ok(data.materials)
         assert.strictEqual(data.materials.length, 2)
 
@@ -264,6 +267,7 @@ test('Material API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
+        assert.strictEqual(data.message, 'Materi berhasil diambil')
         assert.ok(data.material)
         assert.strictEqual(data.material._id, createdMaterialId)
         assert.strictEqual(data.material.title, TEST_MATERIAL.title)
@@ -285,7 +289,7 @@ test('Material API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 404)
         const data = response.json()
-        assert.strictEqual(data.message, 'Material not found')
+        assert.strictEqual(data.message, 'Materi tidak ditemukan')
     })
 
     // Test 13: Get material with invalid ID format
@@ -298,9 +302,9 @@ test('Material API Tests', async (t) => {
             }
         })
 
-        assert.strictEqual(response.statusCode, 500)
+        assert.strictEqual(response.statusCode, 404)
         const data = response.json()
-        assert.strictEqual(data.message, 'Cast to ObjectId failed for value "invalid-id-format" (type string) at path "_id" for model "Material"')
+        assert.strictEqual(data.message, 'Materi tidak ditemukan')
     })
 
     // Test 14: Update material as admin
@@ -320,6 +324,7 @@ test('Material API Tests', async (t) => {
         assert.strictEqual(data.material.description, UPDATED_MATERIAL.description)
         assert.strictEqual(data.material.formula, UPDATED_MATERIAL.formula)
         assert.strictEqual(data.material.example, UPDATED_MATERIAL.example)
+        assert.strictEqual(data.message, 'Materi berhasil diperbarui')
     })
 
     // Test 15: Update material with duplicate title (should fail)
@@ -337,7 +342,7 @@ test('Material API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 409)
         const data = response.json()
-        assert.strictEqual(data.message, 'Material with this title already exists')
+        assert.strictEqual(data.message, 'Materi dengan judul ini sudah ada')
     })
 
     // Test 16: Partial update material
@@ -358,6 +363,7 @@ test('Material API Tests', async (t) => {
         assert.strictEqual(data.material.title, TEST_MATERIAL_2.title) // Title unchanged
         assert.strictEqual(data.material.description, 'Updated description only')
         assert.strictEqual(data.material.formula, TEST_MATERIAL_2.formula) // Formula unchanged
+        assert.strictEqual(data.message, 'Materi berhasil diperbarui')
     })
 
     // Test 17: Update non-existent material
@@ -374,7 +380,7 @@ test('Material API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 404)
         const data = response.json()
-        assert.strictEqual(data.message, 'Material not found')
+        assert.strictEqual(data.message, 'Materi tidak ditemukan')
     })
 
     // Test 18: Delete material as admin
@@ -389,7 +395,7 @@ test('Material API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
-        assert.strictEqual(data.message, 'Material deleted successfully')
+        assert.strictEqual(data.message, 'Materi berhasil dihapus')
     })
 
     // Test 19: Verify material is deleted from database
@@ -411,7 +417,7 @@ test('Material API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 404)
         const data = response.json()
-        assert.strictEqual(data.message, 'Material not found')
+        assert.strictEqual(data.message, 'Materi tidak ditemukan')
     })
 
     // Test 21: Validation tests - Create material with missing required fields

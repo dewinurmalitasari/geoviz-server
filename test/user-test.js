@@ -62,7 +62,7 @@ test('User API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 401)
         const data = response.json()
-        assert.strictEqual(data.message, 'Invalid password')
+        assert.strictEqual(data.message, 'Kata sandi salah')
 
         const response2 = await fastify.inject({
             method: 'POST',
@@ -75,7 +75,7 @@ test('User API Tests', async (t) => {
 
         assert.strictEqual(response2.statusCode, 401)
         const data2 = response2.json()
-        assert.strictEqual(data2.message, 'User not found')
+        assert.strictEqual(data2.message, 'Pengguna tidak ditemukan')
     })
 
     // Test 1: Admin login
@@ -183,6 +183,7 @@ test('User API Tests', async (t) => {
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
         assert.strictEqual(data.user.username, updatedData.username)
+        assert.strictEqual(data.message, 'Pengguna berhasil diperbarui')
     })
 
     // Test 7: Check update in database
@@ -215,6 +216,7 @@ test('User API Tests', async (t) => {
         assert.strictEqual(data.user._id, createdUserId)
         assert.strictEqual(data.user.username, 'updatedstudent')
         assert.strictEqual(data.user.role, TEST_STUDENT.role)
+        assert.strictEqual(data.message, 'Pengguna berhasil diambil')
     })
 
     // Test 9: Populate with multiple users
@@ -248,6 +250,7 @@ test('User API Tests', async (t) => {
         const data = response.json()
         assert.ok(data.users)
         assert.ok(data.users.length >= 4)
+        assert.strictEqual(data.message, 'Pengguna berhasil diambil')
 
         // Check that passwords are excluded
         data.users.forEach(user => {
@@ -338,7 +341,7 @@ test('User API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 403)
         const data = response.json()
-        assert.strictEqual(data.message, 'Teachers can only create student accounts')
+        assert.strictEqual(data.message, 'Guru hanya dapat membuat akun siswa')
     })
 
     // Test 12: Create related data for user and verify deletion cascade
@@ -366,7 +369,7 @@ test('User API Tests', async (t) => {
         await Statistic.create([
             { type: 'visit', data: { page: 'home' }, user: tempStudentId },
             { type: 'material', data: { materialId: 'test123' }, user: tempStudentId },
-            { type: 'practice', data: { practiceId: 'practice123' }, user: tempStudentId }
+            { type: 'practice_attempt', data: { practiceId: 'practice123' }, user: tempStudentId }
         ])
 
         // Create some practice records for the user
@@ -391,6 +394,7 @@ test('User API Tests', async (t) => {
         })
 
         assert.strictEqual(deleteResponse.statusCode, 200)
+        assert.strictEqual(deleteResponse.json().message, 'Pengguna berhasil dihapus')
 
         // Verify related data is deleted
         const statsAfterDelete = await Statistic.find({ user: tempStudentId })
@@ -399,8 +403,7 @@ test('User API Tests', async (t) => {
         assert.strictEqual(practicesAfterDelete.length, 0, 'Practice records should be deleted')
     })
 
-
-    // Test 12a: Delete user (as admin)
+    // Test 13: Delete user (as admin)
     await t.test('Delete user as admin', async (t) => {
         const response = await fastify.inject({
             method: 'DELETE',
@@ -412,23 +415,23 @@ test('User API Tests', async (t) => {
 
         assert.strictEqual(response.statusCode, 200)
         const data = response.json()
-        assert.strictEqual(data.message, 'User deleted')
+        assert.strictEqual(data.message, 'Pengguna berhasil dihapus')
     })
 
-    // Test 13: Check user is deleted from database
+    // Test 14: Check user is deleted from database
     await t.test('Check user is deleted from database', async (t) => {
         const user = await User.findById(createdUserId)
         assert.strictEqual(user, null)
     })
 
-    // Test 14: Clean up - remove all test users except admin
+    // Test 15: Clean up - remove all test users except admin
     await t.test('Clean up test data', async (t) => {
         await User.deleteMany({
-            username: {$in: ['teacher1', 'student2', 'updatedstudent', 'admin']}
+            username: {$in: ['teacher1', 'student2', 'updatedstudent', 'tempstudent', 'admin']}
         })
 
         const remainingTestUsers = await User.find({
-            username: {$in: ['teacher1', 'student1', 'student2', 'updatedstudent']}
+            username: {$in: ['teacher1', 'student1', 'student2', 'updatedstudent', 'tempstudent']}
         })
 
         assert.strictEqual(remainingTestUsers.length, 0)
