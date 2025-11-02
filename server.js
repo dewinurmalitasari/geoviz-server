@@ -15,7 +15,7 @@ const fastify = Fastify({
         customOptions: {
             removeAdditional: false,
             useDefaults: true,
-            coerceTypes: false,
+            coerceTypes: true,
             allErrors: true
         }
     },
