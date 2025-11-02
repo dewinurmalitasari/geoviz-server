@@ -40,12 +40,12 @@ export default async function materialRoutes(fastify) {
     }, async (request) => {
         const { noFormulaAndExample } = request.query;
 
-        let projection = {};
         if (noFormulaAndExample) {
-            projection = { formula: 0, example: 0 };
+            const materials = await Material.find().select('-formula -example').sort({ createdAt: -1 });
+            return { message: 'Materi berhasil diambil', materials };
         }
 
-        const materials = await Material.find({}, projection).sort({ createdAt: -1 });
+        const materials = await Material.find().sort({ createdAt: -1 });
         return { message: 'Materi berhasil diambil', materials };
     });
 
