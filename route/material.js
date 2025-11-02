@@ -7,6 +7,12 @@ export default async function materialRoutes(fastify) {
         preHandler: fastify.authorize(['admin']),
         schema: {
             security: [{ bearerAuth: [] }],
+            querystring: {
+                type: 'object',
+                properties: {
+                    noFormulaAndExample: { type: 'boolean' }
+                }
+            },
             response: {
                 200: {
                     type: 'object',
@@ -31,8 +37,15 @@ export default async function materialRoutes(fastify) {
                 }
             }
         }
-    }, async () => {
-        const materials = await Material.find().sort({ createdAt: -1 });
+    }, async (request) => {
+        const { noFormulaAndExample } = request.query;
+
+        let projection = {};
+        if (noFormulaAndExample) {
+            projection = { formula: 0, example: 0 };
+        }
+
+        const materials = await Material.find({}, projection).sort({ createdAt: -1 });
         return { message: 'Materi berhasil diambil', materials };
     });
 

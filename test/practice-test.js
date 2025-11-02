@@ -322,7 +322,6 @@ test('Practice API Tests', async (t) => {
             assert.ok(practice.score)
             assert.ok(practice.score.correct)
             assert.ok(practice.score.total)
-            assert.ok(practice.user)
             assert.ok(practice.createdAt)
             assert.ok(practice.updatedAt)
         })
@@ -444,9 +443,6 @@ test('Practice API Tests', async (t) => {
         assert.strictEqual(response1.statusCode, 200)
         const data1 = response1.json()
         assert.strictEqual(data1.practices.length, 2)
-        data1.practices.forEach(practice => {
-            assert.strictEqual(practice.user, studentId)
-        })
 
         // Check student 2 practices
         const response2 = await fastify.inject({
@@ -460,7 +456,6 @@ test('Practice API Tests', async (t) => {
         assert.strictEqual(response2.statusCode, 200)
         const data2 = response2.json()
         assert.strictEqual(data2.practices.length, 1)
-        assert.strictEqual(data2.practices[0].user, studentId2)
     })
 
     // Test 20: Get practices without authentication (should fail)

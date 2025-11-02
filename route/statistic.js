@@ -349,5 +349,3 @@ export default async function statisticRoute(fastify) {
         })
     })
 }
-
-// TODO: Get statistic total and completion only, get practice without data make it optional, also material only get title and id optional too
