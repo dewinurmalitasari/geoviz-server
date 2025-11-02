@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 export default async function materialRoutes(fastify) {
     // Get all materials
     fastify.get('/materials', {
-        preHandler: fastify.authorize(['admin']),
+        preHandler: fastify.authorize(['admin', 'teacher', 'student']),
         schema: {
             security: [{ bearerAuth: [] }],
             querystring: {
@@ -51,7 +51,7 @@ export default async function materialRoutes(fastify) {
 
     // Get material by ID
     fastify.get('/materials/:id', {
-        preHandler: fastify.authorize(['admin']),
+        preHandler: fastify.authorize(['admin', 'teacher', 'student']),
         schema: {
             security: [{ bearerAuth: [] }],
             params: {
