@@ -146,9 +146,9 @@ export default async function statisticRoute(fastify) {
                             type: 'object',
                             properties: {
                                 totalVisits: {type: 'number'},
-                                totalMaterialsUnique: {type: 'number'},
+                                totalMaterialsAvailable: {type: 'number'},
                                 totalMaterialsAccessed: {type: 'number'},
-                                totalPracticesUnique: {type: 'number'},
+                                totalPracticesAvailable: {type: 'number'},
                                 totalPracticeAttempts: {type: 'number'},
                                 totalPracticesCompleted: {type: 'number'},
                                 materialAccessCount: {
@@ -164,7 +164,9 @@ export default async function statisticRoute(fastify) {
                                             completed: {type: 'number'}
                                         }
                                     }
-                                }
+                                },
+                                completionRateMaterials: {type: 'number'},
+                                completionRatePractices: {type: 'number'}
                             }
                         }
                     }
@@ -193,22 +195,7 @@ export default async function statisticRoute(fastify) {
                     ],
                     materialCounts: [
                         {$match: {type: 'material'}},
-                        {$group: {_id: '$data.material', count: {$sum: 1}}},
-                        {
-                            $lookup: {
-                                from: 'materials',
-                                localField: '_id',
-                                foreignField: '_id',
-                                as: 'materialInfo'
-                            }
-                        },
-                        {$unwind: '$materialInfo'},
-                        {
-                            $project: {
-                                title: '$materialInfo.title',
-                                count: 1
-                            }
-                        }
+                        {$group: {_id: '$data.material', count: {$sum: 1}}}
                     ],
                     practiceCounts: [
                         {$match: {$or: [{type: 'practice_attempt'}, {type: 'practice_completed'}]}},
@@ -224,26 +211,55 @@ export default async function statisticRoute(fastify) {
             }
         ])
 
+        // Get ALL available materials and practices from your database
+        const [allMaterials, allPracticeCodes] = await Promise.all([
+            mongoose.model('Material').find({}, '_id title'),
+            mongoose.model('Practice').distinct('code')
+        ])
+
         const result = stats[0]
         const typeCounts = Object.fromEntries(result.typeCounts.map(t => [t._id, t.count]))
-        const materialAccessCount = Object.fromEntries(result.materialCounts.map(m => [m.title, m.count]))
-        const practiceCount = Object.fromEntries(result.practiceCounts.map(p => [p._id, {
-            attempted: p.attempted,
-            completed: p.completed
-        }]))
+
+        // Create material access count including ALL materials
+        const materialAccessCount = {}
+        allMaterials.forEach(material => {
+            const materialId = material._id.toString()
+            const userMaterial = result.materialCounts.find(m => m._id.toString() === materialId)
+            materialAccessCount[material.title] = userMaterial ? userMaterial.count : 0
+        })
+
+        // Create practice count including ALL practices
+        const practiceCount = {}
+        allPracticeCodes.forEach(practiceCode => {
+            const userPractice = result.practiceCounts.find(p => p._id === practiceCode)
+            practiceCount[practiceCode] = {
+                attempted: userPractice ? userPractice.attempted : 0,
+                completed: userPractice ? userPractice.completed : 0
+            }
+        })
+
+        // Count of practices that have been completed at least once
+        const completedPracticesCount = Object.values(practiceCount).filter(p => p.completed > 0).length
+        const attemptedPracticesCount = Object.values(practiceCount).filter(p => p.attempted > 0).length
 
         return reply.code(200).send({
             message: 'Ringkasan statistik berhasil diambil',
             summary: {
                 totalVisits: typeCounts.visit || 0,
-                totalMaterialsUnique: result.materialCounts.length,
+                totalMaterialsAvailable: allMaterials.length,
                 totalMaterialsAccessed: typeCounts.material || 0,
-                totalPracticesUnique: result.practiceCounts.length,
+                totalPracticesAvailable: allPracticeCodes.length,
                 totalPracticeAttempts: result.practiceCounts.reduce((sum, p) => sum + p.attempted, 0),
                 totalPracticesCompleted: result.practiceCounts.reduce((sum, p) => sum + p.completed, 0),
                 materialAccessCount,
-                practiceCount
+                practiceCount,
+                completionRateMaterials: allMaterials.length > 0 ?
+                    (attemptedPracticesCount / allMaterials.length) * 100 : 0,
+                completionRatePractices: allPracticeCodes.length > 0 ?
+                    (completedPracticesCount / allPracticeCodes.length) * 100 : 0
             }
         })
     })
 }
+
+// TODO: Get statistic total and completion only, get practice without data make it optional, also material only get title and id optional too
