@@ -10,8 +10,41 @@ import cors from '@fastify/cors'
 config()
 
 const fastify = Fastify({
-    logger: true
+    logger: true,
+    ajv: {
+        customOptions: {
+            removeAdditional: false,
+            useDefaults: true,
+            coerceTypes: false,
+            allErrors: true
+        }
+    },
+    schemaErrorFormatter: (errors, dataVar) => {
+        const messages = errors.map(err => {
+            const field = err.instancePath.replace('/', '') || err.params.missingProperty;
+
+            if (err.keyword === 'required') {
+                return `${err.params.missingProperty} wajib diisi`;
+            }
+            if (err.keyword === 'minLength') {
+                return `${field} minimal ${err.params.limit} karakter`;
+            }
+            if (err.keyword === 'maxLength') {
+                return `${field} maksimal ${err.params.limit} karakter`;
+            }
+            if (err.keyword === 'enum') {
+                return `${field} harus salah satu dari: ${err.params.allowedValues.join(', ')}`;
+            }
+            if (err.keyword === 'type') {
+                return `${field} harus bertipe ${err.params.type}`;
+            }
+            return err.message;
+        });
+
+        return new Error(messages.join(', '));
+    }
 })
+
 
 // CORS configuration for development
 if (process.env.DEV_CORS_ORIGIN) {
