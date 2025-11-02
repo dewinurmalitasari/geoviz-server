@@ -105,16 +105,16 @@ const SAMPLE_MATERIALS = [
 
 // Sample practice codes and topics
 const PRACTICE_TOPICS = [
-    { code: 'algebra_basics_001', topic: 'Basic Algebraic Expressions' },
-    { code: 'algebra_basics_002', topic: 'Solving Simple Equations' },
-    { code: 'linear_eq_001', topic: 'Linear Equations Practice' },
-    { code: 'quadratic_eq_001', topic: 'Quadratic Equations' },
-    { code: 'geometry_001', topic: 'Basic Geometry Problems' },
-    { code: 'geometry_002', topic: 'Area and Perimeter' },
-    { code: 'trigonometry_001', topic: 'Trigonometric Ratios' },
-    { code: 'calculus_001', topic: 'Basic Derivatives' },
-    { code: 'probability_001', topic: 'Probability Calculations' },
-    { code: 'statistics_001', topic: 'Mean and Median' }
+    { code: 'algebra_basics_001', topic: 'Basic Algebraic Expressions', totalQuestions: 10 },
+    { code: 'algebra_basics_002', topic: 'Solving Simple Equations', totalQuestions: 10 },
+    { code: 'linear_eq_001', topic: 'Linear Equations Practice', totalQuestions: 15 },
+    { code: 'quadratic_eq_001', topic: 'Quadratic Equations', totalQuestions: 12 },
+    { code: 'geometry_001', topic: 'Basic Geometry Problems', totalQuestions: 10 },
+    { code: 'geometry_002', topic: 'Area and Perimeter', totalQuestions: 15 },
+    { code: 'trigonometry_001', topic: 'Trigonometric Ratios', totalQuestions: 12 },
+    { code: 'calculus_001', topic: 'Basic Derivatives', totalQuestions: 20 },
+    { code: 'probability_001', topic: 'Probability Calculations', totalQuestions: 10 },
+    { code: 'statistics_001', topic: 'Mean and Median', totalQuestions: 15 }
 ]
 
 // Statistic types according to your schema
@@ -243,8 +243,8 @@ async function createPracticesAndStatistics(students, materials) {
 
         for (let j = 0; j < practiceCount; j++) {
             const topic = PRACTICE_TOPICS[Math.floor(Math.random() * PRACTICE_TOPICS.length)]
-            const totalQuestions = Math.floor(Math.random() * 15) + 5 // 5-20 questions
-            const correctAnswers = Math.floor(Math.random() * (totalQuestions - 3)) + 3 // At least 3 correct
+            const totalQuestions = topic.totalQuestions // Use static total from PRACTICE_TOPICS
+            const correctAnswers = Math.floor(Math.random() * (totalQuestions + 1)) // 0 to totalQuestions correct
 
             // Create practice record
             const practice = new Practice({
