@@ -132,7 +132,6 @@ export default async function practiceRoute(fastify) {
                                         type: 'object',
                                         additionalProperties: true
                                     },
-                                    user: { type: 'string' },
                                     createdAt: { type: 'string' },
                                     updatedAt: { type: 'string' }
                                 }
