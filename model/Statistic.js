@@ -10,7 +10,7 @@ export default mongoose.model('Statistic', statisticSchema)
 
 /* Statistic Data Model
 * visit: {}
-* material: { material: ObjectId }
+* material: { title: String, material: ObjectId }
 * practice_attempt: { code: String }
 * practice_completed: { code: String, practice: ObjectId }
 */

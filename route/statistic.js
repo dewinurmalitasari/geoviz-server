@@ -65,6 +65,9 @@ export default async function statisticRoute(fastify) {
                 if (!data.material) {
                     return reply.code(400).send({message: 'ID materi diperlukan'})
                 }
+                if (!data.title || typeof data.title !== 'string') {
+                    return reply.code(400).send({message: 'Judul materi dipperlukan'})
+                }
                 break
             case 'practice_attempt':
                 if (!data.code || typeof data.code !== 'string') {
