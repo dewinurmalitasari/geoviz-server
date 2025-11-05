@@ -39,67 +39,129 @@ function startProgress(task, total) {
     updateProgress(task, 0, total)
 }
 
-// Sample materials data
+// Helper function to generate random YouTube links
+function generateRandomYouTubeLinks() {
+    const videoIds = [
+        'k1BneeJTDcU', // The specific video you mentioned
+        'dQw4w9WgXcQ', // Rick Roll
+        'b8iSX4o557o', // 【Akie秋絵】約束 Promise【歌ってみた】
+        'tpo8RkoMVlg', // huh?
+        'VZAj-BE7AKo', // neuro padoru
+        '1ewOadBo1Ws' // monster mv camila x neuro
+    ]
+
+    const count = Math.floor(Math.random() * 4) + 1 // 1-4 links
+    const selectedIds = []
+
+    for (let i = 0; i < count; i++) {
+        const randomId = videoIds[Math.floor(Math.random() * videoIds.length)]
+        if (!selectedIds.includes(randomId)) {
+            selectedIds.push(randomId)
+        }
+    }
+
+    return selectedIds.map(id => `https://www.youtube.com/watch?v=${id}`)
+}
+
+// Helper function to generate random placeholder images
+function generateRandomImageLinks() {
+    const resolutions = [
+        '400x300', '600x400', '800x600', '1024x768',
+        '500x400', '640x480', '720x540', '900x600'
+    ]
+
+    const count = Math.floor(Math.random() * 5) + 1 // 1-5 images
+    const images = []
+
+    for (let i = 0; i < count; i++) {
+        const resolution = resolutions[Math.floor(Math.random() * resolutions.length)]
+        images.push(`https://placehold.co/${resolution}`)
+    }
+
+    return images
+}
+
+// Sample materials data with YouTube and image links
 const SAMPLE_MATERIALS = [
     {
         title: 'Algebra Basics',
         description: 'Introduction to algebraic expressions and equations',
         formula: 'a + b = c',
-        example: 'If a=2 and b=3, then 2 + 3 = 5'
+        example: 'If a=2 and b=3, then 2 + 3 = 5',
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
     },
     {
         title: 'Linear Equations',
         description: 'Solving equations with one variable',
         formula: 'ax + b = 0',
-        example: '2x + 3 = 7 → 2x = 4 → x = 2'
+        example: '2x + 3 = 7 → 2x = 4 → x = 2',
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
     },
     {
         title: 'Quadratic Equations',
         description: 'Solving equations of the form ax² + bx + c = 0',
         formula: 'x = [-b ± √(b² - 4ac)] / 2a',
-        example: 'x² + 5x + 6 = 0 → (x + 2)(x + 3) = 0 → x = -2 or x = -3'
+        example: 'x² + 5x + 6 = 0 → (x + 2)(x + 3) = 0 → x = -2 or x = -3',
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
     },
     {
         title: 'Geometry Fundamentals',
         description: 'Basic concepts of geometry including shapes and angles',
         formula: 'A = πr²',
-        example: 'For a circle with radius 5, area = 3.14 * 5² = 78.5'
+        example: 'For a circle with radius 5, area = 3.14 * 5² = 78.5',
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
     },
     {
         title: 'Pythagorean Theorem',
         description: 'Relationship between sides of a right triangle',
         formula: 'a² + b² = c²',
-        example: 'If a=3 and b=4, then c² = 3² + 4² = 9 + 16 = 25 → c = 5'
+        example: 'If a=3 and b=4, then c² = 3² + 4² = 9 + 16 = 25 → c = 5',
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
     },
     {
         title: 'Trigonometry Basics',
         description: 'Introduction to trigonometric functions',
         formula: 'sin(θ) = opposite/hypotenuse',
-        example: 'In a right triangle with opposite=3 and hypotenuse=5, sin(θ) = 3/5 = 0.6'
+        example: 'In a right triangle with opposite=3 and hypotenuse=5, sin(θ) = 3/5 = 0.6',
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
     },
     {
         title: 'Calculus Derivatives',
         description: 'Basic rules of differentiation',
         formula: 'd/dx(xⁿ) = nxⁿ⁻¹',
-        example: 'd/dx(x³) = 3x²'
+        example: 'd/dx(x³) = 3x²',
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
     },
     {
         title: 'Probability Basics',
         description: 'Introduction to probability theory',
         formula: 'P(A) = number of favorable outcomes / total outcomes',
-        example: 'Probability of rolling a 6 on a die: P(6) = 1/6'
+        example: 'Probability of rolling a 6 on a die: P(6) = 1/6',
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
     },
     {
         title: 'Statistics Mean',
         description: 'Calculating average values',
         formula: 'mean = (sum of all values) / (number of values)',
-        example: 'Mean of [2, 4, 6, 8] = (2+4+6+8)/4 = 20/4 = 5'
+        example: 'Mean of [2, 4, 6, 8] = (2+4+6+8)/4 = 20/4 = 5',
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
     },
     {
         title: 'Exponential Functions',
         description: 'Understanding exponential growth and decay',
         formula: 'y = a * bˣ',
-        example: 'If a=2 and b=3, then y = 2 * 3ˣ'
+        example: 'If a=2 and b=3, then y = 2 * 3ˣ',
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
     }
 ]
 
@@ -112,9 +174,9 @@ const PRACTICE_TOPICS = [
     { code: 'geometry_001', topic: 'Basic Geometry Problems', totalQuestions: 10 },
     { code: 'geometry_002', topic: 'Area and Perimeter', totalQuestions: 15 },
     { code: 'trigonometry_001', topic: 'Trigonometric Ratios', totalQuestions: 12 },
-    { code: 'calculus_001', topic: 'Basic Derivatives', totalQuestions: 20 },
-    { code: 'probability_001', topic: 'Probability Calculations', totalQuestions: 10 },
-    { code: 'statistics_001', topic: 'Mean and Median', totalQuestions: 15 }
+    { code: 'calculus_001', topic: 'Basic Derivatives', totalQuestions: 10 },
+    { code: 'probability_001', topic: 'Basic Probability', totalQuestions: 8 },
+    { code: 'statistics_001', topic: 'Mean and Median', totalQuestions: 10 }
 ]
 
 // Statistic types according to your schema
@@ -210,9 +272,26 @@ async function createStudents() {
 }
 
 async function createMaterials() {
-    console.log('📚 Creating learning materials...')
-    const materials = await Material.insertMany(SAMPLE_MATERIALS)
+    console.log('📚 Creating learning materials with YouTube and image links...')
+
+    // Generate fresh random links for each material to ensure variety
+    const materialsWithFreshLinks = SAMPLE_MATERIALS.map(material => ({
+        ...material,
+        youtubeLinks: generateRandomYouTubeLinks(),
+        imageLinks: generateRandomImageLinks()
+    }))
+
+    const materials = await Material.insertMany(materialsWithFreshLinks)
+
     console.log(`✅ Created ${materials.length} learning materials`)
+    console.log('📹 Sample YouTube links generated')
+    console.log('🖼️  Sample image placeholders generated')
+
+    // Log some examples
+    materials.slice(0, 2).forEach((material, index) => {
+        console.log(`   Material ${index + 1}: ${material.youtubeLinks.length} YouTube links, ${material.imageLinks.length} images`)
+    })
+
     return materials
 }
 
@@ -225,7 +304,8 @@ async function createPracticesAndStatistics(students, materials) {
 
     // Calculate total expected practices for progress tracking
     students.forEach(student => {
-        totalPractices += Math.floor(Math.random() * 4) + 2 // 2-5 per student
+        const practiceCount = Math.floor(Math.random() * 10) + 5 // 5-14 practices per student
+        totalPractices += practiceCount
     })
 
     startProgress('📊 Creating practices and statistics', totalPractices + students.length)
@@ -260,7 +340,8 @@ async function createPracticesAndStatistics(students, materials) {
                         answer: `Answer ${idx + 1}`
                     }))
                 },
-                user: student._id
+                user: student._id,
+                completedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) // Random date within last 30 days
             })
             await practice.save()
             practices.push(practice)
@@ -272,7 +353,8 @@ async function createPracticesAndStatistics(students, materials) {
                     code: topic.code,
                     practice: practice._id
                 },
-                user: student._id
+                user: student._id,
+                timestamp: practice.completedAt
             })
             statistics.push(completedStatistic)
 
@@ -298,8 +380,9 @@ async function createGeneralStatistics(student, materials, statistics) {
     for (let i = 0; i < visitCount; i++) {
         const visitStat = new Statistic({
             type: STATISTIC_TYPES.VISIT,
+            user: student._id,
             data: {},
-            user: student._id
+            timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
         })
         statistics.push(visitStat)
     }
@@ -314,7 +397,8 @@ async function createGeneralStatistics(student, materials, statistics) {
                 material: material._id,
                 title: material.title // Added title field to match new schema requirement
             },
-            user: student._id
+            user: student._id,
+            timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
         })
         statistics.push(materialStat)
     }
@@ -328,7 +412,8 @@ async function createGeneralStatistics(student, materials, statistics) {
             data: {
                 code: topic.code
             },
-            user: student._id
+            user: student._id,
+            timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
         })
         statistics.push(practiceStat)
     }
@@ -340,41 +425,38 @@ async function seedDatabase() {
     const startTime = Date.now()
 
     try {
+        // Connect to database
         await connectDB()
+
+        // Drop indexes to avoid conflicts
         await dropAllIndexes()
+
+        // Clear existing data
         await clearDatabase()
 
+        // Create users
         const admin = await createAdmin()
         const teachers = await createTeachers()
         const students = await createStudents()
+
+        // Create materials with YouTube and image links
         const materials = await createMaterials()
+
+        // Create practices and statistics
         const { practices, statistics } = await createPracticesAndStatistics(students, materials)
 
         const endTime = Date.now()
-        const duration = ((endTime - startTime) / 1000).toFixed(2)
+        const duration = Math.round((endTime - startTime) / 1000)
 
-        // Calculate statistic type distribution
-        const statTypes = {
-            visit: statistics.filter(s => s.type === STATISTIC_TYPES.VISIT).length,
-            material: statistics.filter(s => s.type === STATISTIC_TYPES.MATERIAL).length,
-            practice: statistics.filter(s => s.type === STATISTIC_TYPES.PRACTICE_ATTEMPT).length,
-            practice_completed: statistics.filter(s => s.type === STATISTIC_TYPES.PRACTICE_COMPLETED).length
-        }
-
-        console.log('\n🎉 === Database Seeding Completed ===')
-        console.log(`⏱️  Time taken: ${duration} seconds`)
-        console.log('====================================')
-        console.log(`👨‍💼 Admin: 1 user`)
-        console.log(`👨‍🏫 Teachers: ${teachers.length} users`)
-        console.log(`👨‍🎓 Students: ${students.length} users`)
-        console.log(`📚 Materials: ${materials.length} learning materials`)
-        console.log(`📝 Practices: ${practices.length} practice records`)
-        console.log(`📊 Statistics: ${statistics.length} tracking events`)
-        console.log('   └─ 📈 Visits:', statTypes.visit)
-        console.log('   └─ 📖 Material views:', statTypes.material)
-        console.log('   └─ 🎯 Practice starts:', statTypes.practice)
-        console.log('   └─ ✅ Practice completions:', statTypes.practice_completed)
-        console.log('====================================\n')
+        console.log('\n🎉 Database seeding completed successfully!')
+        console.log(`⏱️  Total time: ${duration} seconds`)
+        console.log('\n📊 Summary:')
+        console.log(`   👨‍💼 Admin: 1`)
+        console.log(`   👨‍🏫 Teachers: ${teachers.length}`)
+        console.log(`   👨‍🎓 Students: ${students.length}`)
+        console.log(`   📚 Materials: ${materials.length}`)
+        console.log(`   📝 Practices: ${practices.length}`)
+        console.log(`   📈 Statistics: ${statistics.length}`)
 
         console.log('🔑 Sample login credentials:')
         console.log('   Admin:     username: admin, password: AdminSecurePass123!')
@@ -388,7 +470,7 @@ async function seedDatabase() {
         console.log('   - practice_completed: { code: String, practice: ObjectId }')
 
     } catch (error) {
-        console.error('\n❌ Error seeding database:', error)
+        console.error('\n❌ Seeding failed:', error)
     } finally {
         await mongoose.connection.close()
         console.log('\n🔌 Database connection closed')

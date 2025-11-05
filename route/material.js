@@ -1,6 +1,12 @@
 import Material from "../model/Material.js";
 import mongoose from "mongoose";
 
+// Helper function to validate YouTube URL format
+function isValidYouTubeUrl(url) {
+    const youtubeRegex = /^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$/;
+    return youtubeRegex.test(url);
+}
+
 export default async function materialRoutes(fastify) {
     // Get all materials
     fastify.get('/materials', {
@@ -10,7 +16,7 @@ export default async function materialRoutes(fastify) {
             querystring: {
                 type: 'object',
                 properties: {
-                    noFormulaAndExample: {type: 'boolean'}
+                    onlyIdTitleDesc: {type: 'boolean'}
                 }
             },
             response: {
@@ -28,6 +34,8 @@ export default async function materialRoutes(fastify) {
                                     description: {type: 'string'},
                                     formula: {type: 'string'},
                                     example: {type: 'string'},
+                                    youtubeLinks: {type: 'array', items: {type: 'string'}},
+                                    imageLinks: {type: 'array', items: {type: 'string'}},
                                     createdAt: {type: 'string'},
                                     updatedAt: {type: 'string'}
                                 }
@@ -38,10 +46,10 @@ export default async function materialRoutes(fastify) {
             }
         }
     }, async (request) => {
-        const {noFormulaAndExample} = request.query;
+        const {onlyIdTitleDesc} = request.query;
 
-        if (noFormulaAndExample) {
-            const materials = await Material.find().select('-formula -example').lean();
+        if (onlyIdTitleDesc) {
+            const materials = await Material.find().select('_id title description').lean();
             return {message: 'Materi berhasil diambil', materials};
         }
 
@@ -73,6 +81,8 @@ export default async function materialRoutes(fastify) {
                                 description: {type: 'string'},
                                 formula: {type: 'string'},
                                 example: {type: 'string'},
+                                youtubeLinks: {type: 'array', items: {type: 'string'}},
+                                imageLinks: {type: 'array', items: {type: 'string'}},
                                 createdAt: {type: 'string'},
                                 updatedAt: {type: 'string'}
                             }
@@ -114,7 +124,9 @@ export default async function materialRoutes(fastify) {
                     title: {type: 'string', minLength: 1, maxLength: 255},
                     description: {type: 'string', minLength: 1},
                     formula: {type: 'string', minLength: 1},
-                    example: {type: 'string', minLength: 1}
+                    example: {type: 'string', minLength: 1},
+                    youtubeLinks: {type: 'array', items: {type: 'string'}},
+                    imageLinks: {type: 'array', items: {type: 'string'}}
                 }
             },
             response: {
@@ -130,10 +142,18 @@ export default async function materialRoutes(fastify) {
                                 description: {type: 'string'},
                                 formula: {type: 'string'},
                                 example: {type: 'string'},
+                                youtubeLinks: {type: 'array', items: {type: 'string'}},
+                                imageLinks: {type: 'array', items: {type: 'string'}},
                                 createdAt: {type: 'string'},
                                 updatedAt: {type: 'string'}
                             }
                         }
+                    }
+                },
+                400: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
                     }
                 },
                 409: {
@@ -145,7 +165,18 @@ export default async function materialRoutes(fastify) {
             }
         }
     }, async (request, reply) => {
-        const {title, description, formula, example} = request.body;
+        const {title, description, formula, example, youtubeLinks = [], imageLinks = []} = request.body;
+
+        // Validate YouTube URLs
+        if (youtubeLinks.length > 0) {
+            for (const url of youtubeLinks) {
+                if (!isValidYouTubeUrl(url)) {
+                    return reply.code(400).send({
+                        message: 'Format URL YouTube tidak valid. Gunakan format: https://www.youtube.com/watch?v=VIDEO_ID'
+                    });
+                }
+            }
+        }
 
         // Check if material with same title already exists
         const existingMaterial = await Material.findOne({title});
@@ -157,7 +188,9 @@ export default async function materialRoutes(fastify) {
             title,
             description,
             formula,
-            example
+            example,
+            youtubeLinks,
+            imageLinks
         });
 
         reply.code(201).send({message: 'Materi berhasil dibuat', material});
@@ -180,7 +213,9 @@ export default async function materialRoutes(fastify) {
                     title: {type: 'string', minLength: 1, maxLength: 255},
                     description: {type: 'string', minLength: 1},
                     formula: {type: 'string', minLength: 1},
-                    example: {type: 'string', minLength: 1}
+                    example: {type: 'string', minLength: 1},
+                    youtubeLinks: {type: 'array', items: {type: 'string'}},
+                    imageLinks: {type: 'array', items: {type: 'string'}}
                 }
             },
             response: {
@@ -196,10 +231,18 @@ export default async function materialRoutes(fastify) {
                                 description: {type: 'string'},
                                 formula: {type: 'string'},
                                 example: {type: 'string'},
+                                youtubeLinks: {type: 'array', items: {type: 'string'}},
+                                imageLinks: {type: 'array', items: {type: 'string'}},
                                 createdAt: {type: 'string'},
                                 updatedAt: {type: 'string'}
                             }
                         }
+                    }
+                },
+                400: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
                     }
                 },
                 404: {
@@ -218,10 +261,21 @@ export default async function materialRoutes(fastify) {
         }
     }, async (request, reply) => {
         const {id} = request.params;
-        const {title, description, formula, example} = request.body;
+        const {title, description, formula, example, youtubeLinks, imageLinks} = request.body;
 
         if (!mongoose.isValidObjectId(id)) {
             return reply.code(404).send({message: 'Materi tidak ditemukan'});
+        }
+
+        // Validate YouTube URLs if provided
+        if (youtubeLinks && youtubeLinks.length > 0) {
+            for (const url of youtubeLinks) {
+                if (!isValidYouTubeUrl(url)) {
+                    return reply.code(400).send({
+                        message: 'Format URL YouTube tidak valid. Gunakan format: https://www.youtube.com/watch?v=VIDEO_ID'
+                    });
+                }
+            }
         }
 
         // Check if material exists
@@ -244,6 +298,8 @@ export default async function materialRoutes(fastify) {
         if (description) updateData.description = description;
         if (formula) updateData.formula = formula;
         if (example) updateData.example = example;
+        if (youtubeLinks !== undefined) updateData.youtubeLinks = youtubeLinks;
+        if (imageLinks !== undefined) updateData.imageLinks = imageLinks;
 
         const updatedMaterial = await Material.findByIdAndUpdate(
             id,
