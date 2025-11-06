@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 // Helper function to validate YouTube URL format
 function isValidYouTubeUrl(url) {
-    const youtubeRegex = /^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$/;
+    const youtubeRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/;
     return youtubeRegex.test(url);
 }
 

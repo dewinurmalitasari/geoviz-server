@@ -189,6 +189,8 @@ const STATISTIC_TYPES = {
 
 async function connectDB() {
     console.log('🔌 Connecting to MongoDB...')
+    console.log('MONGODB_URI from env:', process.env.MONGODB_URI)
+    console.log('Connecting to:', MONGODB_URI)
     try {
         await mongoose.connect(MONGODB_URI)
         console.log('✅ Connected to MongoDB successfully')
