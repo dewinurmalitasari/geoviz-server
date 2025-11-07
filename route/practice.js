@@ -168,4 +168,79 @@ export default async function practiceRoute(fastify) {
         const practices = await Practice.find({user: id}, {user: 0}).sort({createdAt: -1}).lean()
         return {message: 'Latihan berhasil diambil', practices}
     })
+
+    // Get single practice by ID
+    fastify.get('/practices/:id', {
+        preHandler: fastify.authorize(['admin', 'teacher', 'student']),
+        schema: {
+            security: [{bearerAuth: []}],
+            params: {
+                type: 'object',
+                required: ['id'],
+                properties: {
+                    id: {type: 'string'}
+                }
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'},
+                        practice: {
+                            type: 'object',
+                            properties: {
+                                _id: {type: 'string'},
+                                code: {type: 'string'},
+                                score: {
+                                    type: 'object',
+                                    properties: {
+                                        correct: {type: 'number'},
+                                        total: {type: 'number'}
+                                    }
+                                },
+                                content: {
+                                    type: 'object',
+                                    additionalProperties: true
+                                },
+                                user: {type: 'string'},
+                                createdAt: {type: 'string'},
+                                updatedAt: {type: 'string'}
+                            }
+                        }
+                    }
+                },
+                403: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
+                },
+                404: {
+                    type: 'object',
+                    properties: {
+                        message: {type: 'string'}
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
+        const {id} = request.params
+
+        if (!mongoose.isValidObjectId(id)) {
+            return reply.code(404).send({message: 'Latihan tidak ditemukan'})
+        }
+
+        const practice = await Practice.findById(id).lean()
+
+        if (!practice) {
+            return reply.code(404).send({message: 'Latihan tidak ditemukan'})
+        }
+
+        // If the requester is a student, ensure they can only access their own practice
+        if (request.user.role === 'student' && request.user.id !== practice.user.toString()) {
+            return reply.code(403).send({message: 'Akses ditolak'})
+        }
+
+        return {message: 'Latihan berhasil diambil', practice}
+    })
 }

@@ -490,7 +490,119 @@ test('Practice API Tests', async (t) => {
         assert.strictEqual(response.statusCode, 400)
     })
 
-    // Test 22: Clean up - remove all test data
+    // Test 23: Get single practice by ID as admin (success)
+    await t.test('Get single practice by ID as admin - success', async (t) => {
+        const response = await fastify.inject({
+            method: 'GET',
+            url: `/practices/${createdPracticeId}`,
+            headers: {
+                authorization: `Bearer ${adminToken}`
+            }
+        })
+
+        assert.strictEqual(response.statusCode, 200)
+        const data = response.json()
+        assert.ok(data.practice)
+        assert.strictEqual(data.practice._id, createdPracticeId)
+        assert.strictEqual(data.practice.code, TEST_PRACTICE.code)
+        assert.strictEqual(data.practice.score.correct, TEST_PRACTICE.score.correct)
+        assert.strictEqual(data.practice.score.total, TEST_PRACTICE.score.total)
+        assert.deepStrictEqual(data.practice.content, TEST_PRACTICE.content)
+        assert.strictEqual(data.practice.user, studentId)
+        assert.ok(data.practice.createdAt)
+        assert.ok(data.practice.updatedAt)
+    })
+
+    // Test 24: Get single practice by ID as teacher (success)
+    await t.test('Get single practice by ID as teacher - success', async (t) => {
+        const response = await fastify.inject({
+            method: 'GET',
+            url: `/practices/${createdPracticeId}`,
+            headers: {
+                authorization: `Bearer ${teacherToken}`
+            }
+        })
+
+        assert.strictEqual(response.statusCode, 200)
+        const data = response.json()
+        assert.strictEqual(data.practice._id, createdPracticeId)
+        assert.strictEqual(data.practice.code, TEST_PRACTICE.code)
+    })
+
+    // Test 25: Get single practice by ID as owner student (success)
+    await t.test('Get single practice by ID as owner student - success', async (t) => {
+        const response = await fastify.inject({
+            method: 'GET',
+            url: `/practices/${createdPracticeId}`,
+            headers: {
+                authorization: `Bearer ${studentToken}`
+            }
+        })
+
+        assert.strictEqual(response.statusCode, 200)
+        const data = response.json()
+        assert.strictEqual(data.practice._id, createdPracticeId)
+        assert.strictEqual(data.practice.user, studentId)
+    })
+
+    // Test 26: Get single practice by ID as different student (should fail)
+    await t.test('Get single practice by ID as different student - should fail', async (t) => {
+        const response = await fastify.inject({
+            method: 'GET',
+            url: `/practices/${createdPracticeId}`,
+            headers: {
+                authorization: `Bearer ${studentToken2}`
+            }
+        })
+
+        assert.strictEqual(response.statusCode, 403)
+        const data = response.json()
+        assert.strictEqual(data.message, 'Akses ditolak')
+    })
+
+    // Test 27: Get single practice with invalid ID format
+    await t.test('Get single practice with invalid ID format', async (t) => {
+        const response = await fastify.inject({
+            method: 'GET',
+            url: '/practices/invalid-id-format',
+            headers: {
+                authorization: `Bearer ${adminToken}`
+            }
+        })
+
+        assert.strictEqual(response.statusCode, 404)
+        const data = response.json()
+        assert.strictEqual(data.message, 'Latihan tidak ditemukan')
+    })
+
+    // Test 28: Get single practice with non-existent ID
+    await t.test('Get single practice with non-existent ID', async (t) => {
+        const fakeId = new mongoose.Types.ObjectId()
+        const response = await fastify.inject({
+            method: 'GET',
+            url: `/practices/${fakeId}`,
+            headers: {
+                authorization: `Bearer ${adminToken}`
+            }
+        })
+
+        assert.strictEqual(response.statusCode, 404)
+        const data = response.json()
+        assert.strictEqual(data.message, 'Latihan tidak ditemukan')
+    })
+
+    // Test 29: Get single practice without authentication (should fail)
+    await t.test('Get single practice without authentication - should fail', async (t) => {
+        const response = await fastify.inject({
+            method: 'GET',
+            url: `/practices/${createdPracticeId}`
+        })
+
+        assert.strictEqual(response.statusCode, 401)
+    })
+
+
+    // Clean up - remove all test data
     await t.test('Clean up test data', async (t) => {
         await Practice.deleteMany({})
         await User.deleteMany({
