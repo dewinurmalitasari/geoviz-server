@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 export default fp(async function (fastify, opts) {
     return new Promise(async (resolve, reject) => {
         try {
-            await mongoose.connect(process.env.MONGODB_URI)
+            await mongoose.connect(process.env.MONGODB_URI)//
             fastify.log.info('MongoDB connected')
 
             fastify.decorate('mongoose', mongoose)
