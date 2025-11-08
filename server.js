@@ -142,3 +142,10 @@ export async function build() {
 
     return fastify
 }
+
+export default async (req, res) => {
+    // Wait for all plugins to be loaded
+    await fastify.ready();
+    // Pass the Vercel request and response to Fastify
+    fastify.server.emit('request', req, res);
+}
