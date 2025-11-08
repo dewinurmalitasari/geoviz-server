@@ -45,7 +45,6 @@ const fastify = Fastify({
     }
 })
 
-
 // CORS configuration for development
 fastify.register(cors, {
     origin: (origin, cb) => {
@@ -83,6 +82,7 @@ fastify.register(swagger, {
         }
     }
 })
+
 // Swagger UI configuration
 fastify.register(swaggerUi, {
     routePrefix: '/docs',
