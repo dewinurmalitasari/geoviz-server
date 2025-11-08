@@ -45,7 +45,6 @@ const fastify = Fastify({
     }
 })
 
-
 // CORS configuration for development
 fastify.register(cors, {
     origin: (origin, cb) => {
