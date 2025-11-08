@@ -51,7 +51,7 @@ fastify.register(cors, {
     origin: (origin, cb) => {
         const allowedOrigins = [
             'http://localhost:', // Development
-            'https://dewinurmalitasari.github.io/geoviz/' // Production
+            'https://dewinurmalitasari.github.io' // Production
         ];
 
         if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
