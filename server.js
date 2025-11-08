@@ -82,6 +82,7 @@ fastify.register(swagger, {
         }
     }
 })
+
 // Swagger UI configuration
 fastify.register(swaggerUi, {
     routePrefix: '/docs',
