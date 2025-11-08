@@ -47,19 +47,22 @@ const fastify = Fastify({
 
 
 // CORS configuration for development
-if (process.env.DEV_CORS_ORIGIN) {
-    fastify.register(cors, {
-        origin: (origin, cb) => {
-            if (!origin || origin.startsWith('http://localhost:')) {
-                cb(null, true)
-            } else {
-                cb(new Error('Not allowed'), false)
-            }
-        },
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-    })
-}
+fastify.register(cors, {
+    origin: (origin, cb) => {
+        const allowedOrigins = [
+            'http://localhost:', // Development
+            'https://dewinurmalitasari.github.io/geoviz/' // Production
+        ];
+
+        if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
+            cb(null, true);
+        } else {
+            cb(new Error('Not allowed'), false);
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+});
 
 // Swagger configuration
 fastify.register(swagger, {
@@ -91,8 +94,12 @@ fastify.register(swaggerUi, {
     },
     initOAuth: {},
     uiHooks: {
-        onRequest: function (request, reply, next) { next() },
-        preHandler: function (request, reply, next) { next() }
+        onRequest: function (request, reply, next) {
+            next()
+        },
+        preHandler: function (request, reply, next) {
+            next()
+        }
     }
 })
 
