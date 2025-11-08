@@ -5,7 +5,7 @@ export default fp(async function (fastify, opts) {
     return new Promise(async (resolve, reject) => {
         try {
             await mongoose.connect(process.env.MONGODB_URI, {
-                directConnection: true,
+                // directConnection: true,
             })
             fastify.log.info('MongoDB connected')
 
