@@ -7,7 +7,6 @@ export default fp(async function (fastify, opts) {
             await mongoose.connect(process.env.MONGODB_URI)
             fastify.log.info('MongoDB connected')
 
-            // Expose mongoose to Fastify instance
             fastify.decorate('mongoose', mongoose)
             resolve()
         } catch (err) {
