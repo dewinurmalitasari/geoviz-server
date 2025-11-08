@@ -110,42 +110,40 @@ const start = async () => {
     }
 }
 
-start()
+// start()
 
-export async function build() {
-    const fastify = Fastify({
-        logger: false // Disable logger during tests for cleaner output
-    })
+// export async function build() {
+//     const fastify = Fastify({
+//         logger: false // Disable logger during tests for cleaner output
+//     })
 
-    // Register Swagger for test build as well
-    fastify.register(swagger, {
-        swagger: {
-            info: {
-                title: 'GeoViz API Documentation',
-                description: 'Back-End Server for GeoViz',
-                version: '1.0.0'
-            },
-            host: 'localhost:3000', // Default for tests
-            schemes: ['http'],
-            consumes: ['application/json'],
-            produces: ['application/json']
-        }
-    })
+//     // Register Swagger for test build as well
+//     fastify.register(swagger, {
+//         swagger: {
+//             info: {
+//                 title: 'GeoViz API Documentation',
+//                 description: 'Back-End Server for GeoViz',
+//                 version: '1.0.0'
+//             },
+//             host: 'localhost:3000', // Default for tests
+//             schemes: ['http'],
+//             consumes: ['application/json'],
+//             produces: ['application/json']
+//         }
+//     })
 
-    fastify.register(swaggerUi, {
-        routePrefix: '/docs'
-    })
+//     fastify.register(swaggerUi, {
+//         routePrefix: '/docs'
+//     })
 
-    fastify.register(mongoosePlugin)
-    fastify.register(auth)
-    fastify.register(routes)
+//     fastify.register(mongoosePlugin)
+//     fastify.register(auth)
+//     fastify.register(routes)
 
-    return fastify
-}
+//     return fastify
+// }
 
 export default async (req, res) => {
-    // Wait for all plugins to be loaded
     await fastify.ready();
-    // Pass the Vercel request and response to Fastify
     fastify.server.emit('request', req, res);
 }
