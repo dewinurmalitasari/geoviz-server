@@ -185,14 +185,16 @@ export default async function reactionRoutes(fastify) {
             return reply.code(404).send({message: 'Pengguna tidak ditemukan'});
         }
 
-        const reactions = user.reactions.map(reaction => {
-            const reactionObj = reaction.toObject();
-            return {
-                ...reactionObj,
-                materialTitle: reaction.materialId?.title || null,
-                materialId: reaction.materialId?._id?.toString() || reactionObj.materialId
-            };
-        });
+        const reactions = user.reactions
+            .sort((a, b) => b.createdAt - a.createdAt)
+            .map(reaction => {
+                const reactionObj = reaction.toObject();
+                return {
+                    ...reactionObj,
+                    materialTitle: reaction.materialId?.title || null,
+                    materialId: reaction.materialId?._id?.toString() || reactionObj.materialId
+                };
+            });
 
         return {
             message: 'Reaksi berhasil diambil',
