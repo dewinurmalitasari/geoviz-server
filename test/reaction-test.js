@@ -417,6 +417,13 @@ test('Reaction API Tests', async (t) => {
         assert.ok(practiceReaction)
         assert.strictEqual(materialReaction.reaction, UPDATED_MATERIAL_REACTION.reaction)
         assert.strictEqual(practiceReaction.reaction, UPDATED_PRACTICE_REACTION.reaction)
+
+        // Verify materialTitle is included
+        assert.ok(materialReaction.materialTitle)
+        assert.strictEqual(materialReaction.materialTitle, TEST_MATERIAL.title)
+
+        // Verify practiceReaction doesn't have materialTitle
+        assert.strictEqual(practiceReaction.materialTitle, '')
     })
 
     // Test 18: Get all reactions for user as teacher (success)
@@ -433,6 +440,10 @@ test('Reaction API Tests', async (t) => {
         const data = response.json()
         assert.ok(data.reactions)
         assert.strictEqual(data.reactions.length, 2)
+
+        // Verify materialTitle is present
+        const materialReaction = data.reactions.find(r => r.type === 'material')
+        assert.ok(materialReaction.materialTitle)
     })
 
     // Test 19: Get all reactions for user as same student (success)
@@ -449,6 +460,11 @@ test('Reaction API Tests', async (t) => {
         const data = response.json()
         assert.ok(data.reactions)
         assert.strictEqual(data.reactions.length, 2)
+
+        // Verify materialTitle is present
+        const materialReaction = data.reactions.find(r => r.type === 'material')
+        assert.ok(materialReaction.materialTitle)
+        assert.strictEqual(materialReaction.materialTitle, TEST_MATERIAL.title)
     })
 
     // Test 20: Get all reactions for different user as student (should fail)
@@ -498,6 +514,10 @@ test('Reaction API Tests', async (t) => {
         assert.strictEqual(data.reaction.reaction, UPDATED_MATERIAL_REACTION.reaction)
         assert.strictEqual(data.reaction.type, 'material')
         assert.strictEqual(data.reaction.materialId, materialId)
+
+        // Verify materialTitle is included
+        assert.ok(data.reaction.materialTitle)
+        assert.strictEqual(data.reaction.materialTitle, TEST_MATERIAL.title)
     })
 
     // Test 23: Get material reaction with invalid materialId
@@ -651,6 +671,10 @@ test('Reaction API Tests', async (t) => {
         const data2 = response2.json()
         assert.strictEqual(data2.reactions.length, 1)
         assert.strictEqual(data2.reactions[0].materialId, materialId2)
+
+        // Verify materialTitle for student 2's reaction
+        assert.ok(data2.reactions[0].materialTitle)
+        assert.strictEqual(data2.reactions[0].materialTitle, TEST_MATERIAL_2.title)
     })
 
     // Test 31: Get reactions without authentication (should fail)

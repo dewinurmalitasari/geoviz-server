@@ -141,6 +141,7 @@ export default async function reactionRoutes(fastify) {
                                     reaction: {type: 'string'},
                                     type: {type: 'string'},
                                     materialId: {type: 'string'},
+                                    materialTitle: {type: 'string'},
                                     practiceCode: {type: 'string'},
                                     createdAt: {type: 'string', format: 'date-time'},
                                     updatedAt: {type: 'string', format: 'date-time'}
@@ -175,14 +176,27 @@ export default async function reactionRoutes(fastify) {
             return reply.code(403).send({message: 'Akses ditolak'});
         }
 
-        const user = await User.findById(id);
+        const user = await User.findById(id).populate({
+            path: 'reactions.materialId',
+            select: 'title'
+        });
+
         if (!user) {
             return reply.code(404).send({message: 'Pengguna tidak ditemukan'});
         }
 
+        const reactions = user.reactions.map(reaction => {
+            const reactionObj = reaction.toObject();
+            return {
+                ...reactionObj,
+                materialTitle: reaction.materialId?.title || null,
+                materialId: reaction.materialId?._id?.toString() || reactionObj.materialId
+            };
+        });
+
         return {
             message: 'Reaksi berhasil diambil',
-            reactions: user.reactions
+            reactions
         };
     });
 
@@ -209,6 +223,7 @@ export default async function reactionRoutes(fastify) {
                                 reaction: {type: 'string'},
                                 type: {type: 'string'},
                                 materialId: {type: 'string'},
+                                materialTitle: {type: 'string'},
                                 createdAt: {type: 'string', format: 'date-time'},
                                 updatedAt: {type: 'string', format: 'date-time'}
                             }
@@ -231,22 +246,31 @@ export default async function reactionRoutes(fastify) {
             return reply.code(404).send({message: 'Material tidak ditemukan'});
         }
 
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate({
+            path: 'reactions.materialId',
+            select: 'title'
+        });
+
         if (!user) {
             return reply.code(404).send({message: 'Pengguna tidak ditemukan'});
         }
 
         const reaction = user.reactions.find(r =>
-            r.type === 'material' && r.materialId?.toString() === materialId
+            r.type === 'material' && r.materialId?._id.toString() === materialId
         );
 
         if (!reaction) {
             return reply.code(404).send({message: 'Reaksi tidak ditemukan'});
         }
 
+        const reactionObj = reaction.toObject();
         return {
             message: 'Reaksi berhasil diambil',
-            reaction
+            reaction: {
+                ...reactionObj,
+                materialTitle: reaction.materialId?.title || null,
+                materialId: reaction.materialId?._id?.toString() || reactionObj.materialId
+            }
         };
     });
 

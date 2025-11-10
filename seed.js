@@ -421,6 +421,77 @@ async function createGeneralStatistics(student, materials, statistics) {
     }
 }
 
+async function createStudentsWithReactions(materials) {
+    const totalStudents = 30
+    startProgress('👨‍🎓 Creating student users with reactions', totalStudents)
+
+    const students = []
+    const reactions = ['happy', 'neutral', 'sad', 'confused']
+
+    for (let i = 1; i <= totalStudents; i++) {
+        const student = new User({
+            username: `student${i}`,
+            password: 'studentPass123',
+            role: 'student',
+            reactions: []
+        })
+
+        // Add 2-5 material reactions per student
+        const materialReactionCount = Math.floor(Math.random() * 4) + 2
+        const usedMaterials = new Set()
+
+        for (let j = 0; j < materialReactionCount; j++) {
+            let material
+            // Ensure unique materials for each student
+            do {
+                material = materials[Math.floor(Math.random() * materials.length)]
+            } while (usedMaterials.has(material._id.toString()) && usedMaterials.size < materials.length)
+
+            usedMaterials.add(material._id.toString())
+
+            student.reactions.push({
+                reaction: reactions[Math.floor(Math.random() * reactions.length)],
+                type: 'material',
+                materialId: material._id,
+                createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+                updatedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
+            })
+        }
+
+        // Add 1-3 practice reactions per student
+        const practiceReactionCount = Math.floor(Math.random() * 3) + 1
+        const usedPractices = new Set()
+
+        for (let j = 0; j < practiceReactionCount; j++) {
+            let topic
+            // Ensure unique practice codes for each student
+            do {
+                topic = PRACTICE_TOPICS[Math.floor(Math.random() * PRACTICE_TOPICS.length)]
+            } while (usedPractices.has(topic.code) && usedPractices.size < PRACTICE_TOPICS.length)
+
+            usedPractices.add(topic.code)
+
+            student.reactions.push({
+                reaction: reactions[Math.floor(Math.random() * reactions.length)],
+                type: 'practice',
+                practiceCode: topic.code,
+                createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+                updatedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
+            })
+        }
+
+        await student.save()
+        students.push(student)
+        updateProgress('👨‍🎓 Creating student users with reactions', i, totalStudents)
+    }
+
+    // Calculate total reactions
+    const totalReactions = students.reduce((sum, student) => sum + student.reactions.length, 0)
+    console.log(`\n✅ Created ${totalReactions} reactions across ${students.length} students`)
+
+    return students
+}
+
 async function seedDatabase() {
     console.log('🚀 Starting database seeding process...\n')
 
@@ -439,10 +510,12 @@ async function seedDatabase() {
         // Create users
         const admin = await createAdmin()
         const teachers = await createTeachers()
-        const students = await createStudents()
 
-        // Create materials with YouTube and image links
+        // Create materials first
         const materials = await createMaterials()
+
+        // Create students with reactions (now that materials exist)
+        const students = await createStudentsWithReactions(materials)
 
         // Create practices and statistics
         const { practices, statistics } = await createPracticesAndStatistics(students, materials)
@@ -457,19 +530,22 @@ async function seedDatabase() {
         console.log(`   👨‍🏫 Teachers: ${teachers.length}`)
         console.log(`   👨‍🎓 Students: ${students.length}`)
         console.log(`   📚 Materials: ${materials.length}`)
+        console.log(`   😊 Reactions: ${students.reduce((sum, s) => sum + s.reactions.length, 0)}`)
         console.log(`   📝 Practices: ${practices.length}`)
         console.log(`   📈 Statistics: ${statistics.length}`)
 
-        console.log('🔑 Sample login credentials:')
+        console.log('\n🔑 Sample login credentials:')
         console.log('   Admin:     username: admin, password: AdminSecurePass123!')
         console.log('   Teacher 1: username: teacher1, password: teacherPass123')
         console.log('   Student 1: username: student1, password: studentPass123')
 
-        console.log('\n📋 Statistic Data Structure:')
-        console.log('   - visit: {}')
-        console.log('   - material: { material: ObjectId, title: String }') // Updated to show new structure
-        console.log('   - practice_attempt: { code: String }')
-        console.log('   - practice_completed: { code: String, practice: ObjectId }')
+        console.log('\n📋 Data Structure:')
+        console.log('   Reactions: Each student has 2-5 material reactions and 1-3 practice reactions')
+        console.log('   Statistics:')
+        console.log('     - visit: {}')
+        console.log('     - material: { material: ObjectId, title: String }')
+        console.log('     - practice_attempt: { code: String }')
+        console.log('     - practice_completed: { code: String, practice: ObjectId }')
 
     } catch (error) {
         console.error('\n❌ Seeding failed:', error)
