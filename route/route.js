@@ -3,6 +3,7 @@ import User from "../model/User.js";
 import materialRoutes from "./material.js";
 import practiceRoute from "./practice.js";
 import statisticRoute from "./statistic.js";
+import reactionRoute from "./reaction.js";
 
 export default async function routes(fastify, options) {
     fastify.get('/', async (request, reply) => {
@@ -74,4 +75,7 @@ export default async function routes(fastify, options) {
 
     // Statistics route
     fastify.register(statisticRoute)
+
+    // Reaction route
+    fastify.register(reactionRoute)
 }
